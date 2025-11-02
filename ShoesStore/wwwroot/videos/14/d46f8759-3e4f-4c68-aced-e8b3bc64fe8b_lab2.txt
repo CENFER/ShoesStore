@@ -1,0 +1,630 @@
+/* ============================
+   LAB-2 FULL SCRIPT (SQL Server / SSMS 21)
+   CSDL: QLSV  (đã Restore từ qlsv.bak)
+   ============================ */
+
+USE QLSV;
+GO
+
+/* ======================================
+   BÀI 1 — Lọc & Sắp xếp dữ liệu
+   (theo yêu cầu trong PDF)
+   ====================================== */
+/* 1 */ SELECT MaMH, TenMH, SoTiet FROM MONHOC ORDER BY MaMH;
+/* 2 */ SELECT MaSV, HoSV, TenSV, HocBong FROM SINHVIEN ORDER BY MaSV;
+/* 3 */ SELECT MaSV, TenSV, Phai, NgaySinh FROM SINHVIEN ORDER BY TenSV;
+/* 4 */ SELECT (HoSV + N' ' + TenSV) AS HoTen, NgaySinh, HocBong
+        FROM SINHVIEN
+        ORDER BY NgaySinh ASC, HocBong DESC;
+/* 5 */ SELECT MaMH, TenMH, SoTiet FROM MONHOC
+        WHERE TenMH LIKE N'T%';
+/* 6 */ SELECT (HoSV + N' ' + TenSV) AS HoTen, NgaySinh, Phai
+        FROM SINHVIEN
+        WHERE TenSV LIKE N'%i';
+/* 7 */ SELECT MaKhoa, TenKhoa
+        FROM KHOA
+        WHERE SUBSTRING(TenKhoa,2,1) = N'N';
+/* 8 */ SELECT * FROM SINHVIEN
+        WHERE HoSV LIKE N'%Thị%';
+/* 9 */ SELECT MaSV, (HoSV + N' ' + TenSV) AS HoTen, Phai, HocBong
+        FROM SINHVIEN
+        WHERE LOWER(LEFT(TenSV,1)) BETWEEN 'a' AND 'm';
+/* 10 */ SELECT (HoSV + N' ' + TenSV) AS HoTen, NgaySinh, NoiSinh, HocBong
+         FROM SINHVIEN
+         WHERE EXISTS (SELECT 1)
+         ORDER BY HoSV, TenSV;  -- sắp tăng theo họ tên
+/* 11 */ -- (nối tiếp các yêu cầu “lọc & sắp xếp” trong phần cuối Bài 1 của PDF)
+-- 17. SV khoa Anh văn và Triết
+SELECT MaSV, MaKhoa, Phai
+FROM SINHVIEN
+WHERE MaKhoa IN (SELECT MaKhoa FROM KHOA WHERE TenKhoa IN (N'Anh văn', N'Triết'));
+
+-- 18. SV sinh từ 01/01/1986 đến 05/06/1992
+SELECT MaSV, NgaySinh, NoiSinh, HocBong
+FROM SINHVIEN
+WHERE NgaySinh BETWEEN '1986-01-01' AND '1992-06-05';
+
+-- 19. SV học bổng 200,000–800,000
+SELECT MaSV, NgaySinh, Phai, MaKhoa
+FROM SINHVIEN
+WHERE HocBong BETWEEN 200000 AND 800000;
+
+-- 20. Môn có số tiết 40 < SoTiet < 60
+SELECT MaMH, TenMH, SoTiet
+FROM MONHOC
+WHERE SoTiet > 40 AND SoTiet < 60;
+
+-- 21. Nam khoa Anh văn
+SELECT SV.MaSV, (SV.HoSV + N' ' + SV.TenSV) AS HoTen, SV.Phai
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+WHERE K.TenKhoa = N'Anh văn' AND SV.Phai = N'Nam';
+
+-- 22. SV nơi sinh Hà Nội và sinh sau 01/01/1990
+SELECT HoSV, TenSV, NoiSinh, NgaySinh
+FROM SINHVIEN
+WHERE NoiSinh = N'Hà Nội' AND NgaySinh > '1990-01-01';
+
+-- 23. SV nữ, tên có chứa chữ N
+SELECT * FROM SINHVIEN
+WHERE Phai = N'Nữ' AND TenSV LIKE N'%N%';
+
+-- 24. Nam SV khoa Tin học, sinh sau 30/05/1986
+SELECT SV.*
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+WHERE K.TenKhoa = N'Tin học' AND SV.Phai = N'Nam' AND SV.NgaySinh > '1986-05-30';
+
+-- 25. Liệt kê Họ và Tên, Giới tính (Nam/Nữ), Ngày sinh
+SELECT (HoSV + N' ' + TenSV) AS HoTen,
+       CASE WHEN Phai IN (N'Nam', N'True', N'1') THEN N'Nam' ELSE N'Nữ' END AS GioiTinh,
+       NgaySinh
+FROM SINHVIEN;
+
+-- 26. MaSV, Tuổi, NoiSinh, MaKhoa  (Tuổi = năm hiện hành - năm sinh)
+SELECT MaSV,
+       DATEDIFF(YEAR, NgaySinh, GETDATE()) AS Tuoi,
+       NoiSinh, MaKhoa
+FROM SINHVIEN;
+
+-- 27. SV tuổi > 20: Họ tên, Tuổi, Học bổng
+SELECT (HoSV + N' ' + TenSV) AS HoTen,
+       DATEDIFF(YEAR, NgaySinh, GETDATE()) AS Tuoi,
+       HocBong
+FROM SINHVIEN
+WHERE DATEDIFF(YEAR, NgaySinh, GETDATE()) > 20;
+
+-- 28. SV tuổi 20..30: Họ tên, Tuổi, Tên khoa
+SELECT (SV.HoSV + N' ' + SV.TenSV) AS HoTen,
+       DATEDIFF(YEAR, SV.NgaySinh, GETDATE()) AS Tuoi,
+       K.TenKhoa
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+WHERE DATEDIFF(YEAR, SV.NgaySinh, GETDATE()) BETWEEN 20 AND 30;
+GO
+/* (Bài 1 theo PDF) */ -- :contentReference[oaicite:5]{index=5}
+
+/* ======================================
+   BÀI 2 — Sử dụng HÀM trong truy vấn
+   ====================================== */
+-- 1. HoTen, Giới tính Nam/Nữ, Tuổi, MaKhoa (Tuổi giảm dần)
+SELECT (HoSV + N' ' + TenSV) AS HoTen,
+       CASE WHEN Phai IN (N'Nam', N'True', N'1') THEN N'Nam' ELSE N'Nữ' END AS GioiTinh,
+       DATEDIFF(YEAR, NgaySinh, GETDATE()) AS Tuoi,
+       MaKhoa
+FROM SINHVIEN
+ORDER BY Tuoi DESC;
+
+-- 2. Sinh tháng 2/1994, Ngày sinh chỉ lấy ngày
+SELECT (HoSV + N' ' + TenSV) AS HoTen, Phai, DAY(NgaySinh) AS Ngay
+FROM SINHVIEN
+WHERE YEAR(NgaySinh) = 1994 AND MONTH(NgaySinh) = 2;
+
+-- 3. Sắp xếp giảm dần theo Ngày sinh
+SELECT * FROM SINHVIEN ORDER BY NgaySinh DESC;
+
+-- 4. Phân loại mức học bổng
+SELECT MaSV, Phai, MaKhoa,
+       CASE WHEN HocBong > 500000 THEN N'Học bổng cao' ELSE N'Mức trung bình' END AS MucHB
+FROM SINHVIEN;
+
+-- 5. Điểm thi: HoTen, MaMH, Diem (sắp theo HoTen, MaMH)
+SELECT (SV.HoSV + N' ' + SV.TenSV) AS HoTen, KQ.MaMH, KQ.Diem
+FROM KETQUA KQ
+JOIN SINHVIEN SV ON SV.MaSV = KQ.MaSV
+ORDER BY HoTen, KQ.MaMH;
+
+-- 6. Danh sách SV khoa Anh văn (lọc theo tên khoa): HoTen, Giới tính, Tên khoa
+SELECT (SV.HoSV + N' ' + SV.TenSV) AS HoTen,
+       CASE WHEN SV.Phai IN (N'Nam', N'True', N'1') THEN N'Nam' ELSE N'Nữ' END AS GioiTinh,
+       K.TenKhoa
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+WHERE K.TenKhoa = N'Anh văn';
+
+-- 7. Bảng điểm SV khoa Tin học: Tên khoa, HoTen, Tên môn, Số tiết, Điểm
+SELECT K.TenKhoa, (SV.HoSV + N' ' + SV.TenSV) AS HoTen, MH.TenMH, MH.SoTiet, KQ.Diem
+FROM SINHVIEN SV
+JOIN KHOA K  ON K.MaKhoa = SV.MaKhoa
+JOIN KETQUA KQ ON KQ.MaSV = SV.MaSV
+JOIN MONHOC MH ON MH.MaMH = KQ.MaMH
+WHERE K.TenKhoa = N'Tin học';
+
+-- 8. Kết quả học tập: HoTen, MaKhoa, TenMon, Diem, Loai
+SELECT (SV.HoSV + N' ' + SV.TenSV) AS HoTen, SV.MaKhoa, MH.TenMH AS TenMon, KQ.Diem,
+       CASE WHEN KQ.Diem > 8 THEN N'Giỏi'
+            WHEN KQ.Diem >= 6 THEN N'Khá'
+            ELSE N'Trung bình' END AS Loai
+FROM SINHVIEN SV
+JOIN KETQUA KQ ON KQ.MaSV = SV.MaSV
+JOIN MONHOC MH ON MH.MaMH = KQ.MaMH;
+GO
+/* (Bài 2 theo PDF) */ -- :contentReference[oaicite:6]{index=6}
+
+/* ======================================
+   BÀI 3 — Thống kê & Tổng hợp
+   ====================================== */
+-- 1. Trung bình điểm theo từng môn
+SELECT MH.MaMH, MH.TenMH, AVG(KQ.Diem) AS TrungBinh
+FROM MONHOC MH
+LEFT JOIN KETQUA KQ ON KQ.MaMH = MH.MaMH
+GROUP BY MH.MaMH, MH.TenMH;
+
+-- 2. Số môn thi của từng sinh viên
+SELECT (SV.HoSV + N' ' + SV.TenSV) AS HoTen, K.TenKhoa, COUNT(KQ.MaMH) AS TongMonThi
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+LEFT JOIN KETQUA KQ ON KQ.MaSV = SV.MaSV
+GROUP BY SV.HoSV, SV.TenSV, K.TenKhoa;
+
+-- 3. Tổng điểm thi của từng sinh viên
+SELECT (SV.HoSV + N' ' + SV.TenSV) AS HoTen, K.TenKhoa, SV.Phai, SUM(ISNULL(KQ.Diem,0)) AS TongDiem
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+LEFT JOIN KETQUA KQ ON KQ.MaSV = SV.MaSV
+GROUP BY SV.HoSV, SV.TenSV, K.TenKhoa, SV.Phai;
+
+-- 4. Tổng số sinh viên mỗi khoa
+SELECT K.TenKhoa, COUNT(*) AS TongSV
+FROM KHOA K
+LEFT JOIN SINHVIEN SV ON SV.MaKhoa = K.MaKhoa
+GROUP BY K.TenKhoa;
+
+-- 5. Điểm cao nhất của mỗi sinh viên
+SELECT (SV.HoSV + N' ' + SV.TenSV) AS HoTen, MAX(KQ.Diem) AS DiemCaoNhat
+FROM SINHVIEN SV
+LEFT JOIN KETQUA KQ ON KQ.MaSV = SV.MaSV
+GROUP BY SV.HoSV, SV.TenSV;
+
+-- 6. Môn có số tiết nhiều nhất
+SELECT TOP(1) TenMH, SoTiet
+FROM MONHOC
+ORDER BY SoTiet DESC;
+
+-- 7. Học bổng cao nhất của từng khoa
+SELECT K.MaKhoa, K.TenKhoa, MAX(ISNULL(SV.HocBong,0)) AS HocBongMax
+FROM KHOA K
+LEFT JOIN SINHVIEN SV ON SV.MaKhoa = K.MaKhoa
+GROUP BY K.MaKhoa, K.TenKhoa;
+
+-- 8. Điểm cao nhất của mỗi môn
+SELECT MH.TenMH, MAX(ISNULL(KQ.Diem,0)) AS DiemCaoNhat
+FROM MONHOC MH
+LEFT JOIN KETQUA KQ ON KQ.MaMH = MH.MaMH
+GROUP BY MH.TenMH;
+
+-- 9. Số SV học từng môn
+SELECT MH.MaMH, MH.TenMH, COUNT(DISTINCT KQ.MaSV) AS SoSV
+FROM MONHOC MH
+LEFT JOIN KETQUA KQ ON KQ.MaMH = MH.MaMH
+GROUP BY MH.MaMH, MH.TenMH;
+
+-- 10. Môn có điểm thi cao nhất (môn, số tiết, tên SV, điểm)
+SELECT TOP(1) MH.TenMH, MH.SoTiet, (SV.HoSV + N' ' + SV.TenSV) AS HoTen, KQ.Diem
+FROM KETQUA KQ
+JOIN MONHOC MH ON MH.MaMH = KQ.MaMH
+JOIN SINHVIEN SV ON SV.MaSV = KQ.MaSV
+ORDER BY KQ.Diem DESC, MH.TenMH;
+
+-- 11. Khoa đông sinh viên nhất
+SELECT TOP(1) K.MaKhoa, K.TenKhoa, COUNT(*) AS TongSV
+FROM KHOA K
+LEFT JOIN SINHVIEN SV ON SV.MaKhoa = K.MaKhoa
+GROUP BY K.MaKhoa, K.TenKhoa
+ORDER BY COUNT(*) DESC;
+
+-- 12. Khoa có SV nhận học bổng cao nhất
+SELECT TOP(1) K.TenKhoa, (SV.HoSV + N' ' + SV.TenSV) AS HoTen, SV.HocBong
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+ORDER BY SV.HocBong DESC;
+
+-- 13. SV khoa Tin học có học bổng cao nhất
+SELECT TOP(1) SV.MaSV, SV.HoSV, SV.TenSV, K.TenKhoa, SV.HocBong
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+WHERE K.TenKhoa = N'Tin học'
+ORDER BY SV.HocBong DESC;
+
+-- 14. SV có điểm môn Cơ sở dữ liệu lớn nhất
+SELECT TOP(1) SV.HoSV, SV.TenSV, MH.TenMH, KQ.Diem
+FROM KETQUA KQ
+JOIN MONHOC MH ON MH.MaMH = KQ.MaMH
+JOIN SINHVIEN SV ON SV.MaSV = KQ.MaSV
+WHERE MH.TenMH = N'Cơ sở dữ liệu'
+ORDER BY KQ.Diem DESC;
+
+-- 15. TOP 3 SV điểm môn Đồ họa thấp nhất
+SELECT TOP(3) (SV.HoSV + N' ' + SV.TenSV) AS HoTen, K.TenKhoa, MH.TenMH, KQ.Diem
+FROM KETQUA KQ
+JOIN MONHOC MH ON MH.MaMH = KQ.MaMH
+JOIN SINHVIEN SV ON SV.MaSV = KQ.MaSV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+WHERE MH.TenMH = N'Đồ hoạ'
+ORDER BY KQ.Diem ASC;
+
+-- 16. Khoa có nhiều SV nữ nhất
+SELECT TOP(1) K.MaKhoa, K.TenKhoa, COUNT(*) AS SoSVNu
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+WHERE SV.Phai = N'Nữ'
+GROUP BY K.MaKhoa, K.TenKhoa
+ORDER BY SoSVNu DESC;
+
+-- 17. Thống kê theo khoa: tổng SV, tổng SV nữ
+SELECT K.MaKhoa, K.TenKhoa,
+       COUNT(*) AS TongSV,
+       SUM(CASE WHEN SV.Phai = N'Nữ' THEN 1 ELSE 0 END) AS TongSVNu
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+GROUP BY K.MaKhoa, K.TenKhoa;
+
+-- 18. Kết quả: Đậu nếu không có môn nào < 4
+SELECT (SV.HoSV + N' ' + SV.TenSV) AS HoTen, K.TenKhoa,
+       CASE WHEN NOT EXISTS (
+             SELECT 1 FROM KETQUA KQ WHERE KQ.MaSV = SV.MaSV AND KQ.Diem < 4
+       ) THEN N'Đậu' ELSE N'Rớt' END AS KetQua
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa;
+
+-- 19. SV không có môn nào < 4
+SELECT (SV.HoSV + N' ' + SV.TenSV) AS HoTen, K.TenKhoa, SV.Phai
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+WHERE NOT EXISTS (SELECT 1 FROM KETQUA KQ WHERE KQ.MaSV = SV.MaSV AND KQ.Diem < 4);
+
+-- 20. Môn không có điểm < 4
+SELECT MH.MaMH, MH.TenMH
+FROM MONHOC MH
+WHERE NOT EXISTS (SELECT 1 FROM KETQUA KQ WHERE KQ.MaMH = MH.MaMH AND KQ.Diem < 4);
+
+-- 21. Khoa không có SV rớt (điểm < 5)
+SELECT K.MaKhoa, K.TenKhoa
+FROM KHOA K
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM SINHVIEN SV
+    WHERE SV.MaKhoa = K.MaKhoa
+      AND EXISTS (SELECT 1 FROM KETQUA KQ WHERE KQ.MaSV = SV.MaSV AND KQ.Diem < 5)
+);
+
+-- 22. Thống kê số SV đậu và rớt từng môn (rớt < 5)
+SELECT MH.MaMH, MH.TenMH,
+       SUM(CASE WHEN KQ.Diem >= 5 THEN 1 ELSE 0 END) AS SoSVDau,
+       SUM(CASE WHEN KQ.Diem < 5 THEN 1 ELSE 0 END)  AS SoSVRot
+FROM MONHOC MH
+LEFT JOIN KETQUA KQ ON KQ.MaMH = MH.MaMH
+GROUP BY MH.MaMH, MH.TenMH;
+
+-- 23. Môn không có SV rớt
+SELECT MH.MaMH, MH.TenMH
+FROM MONHOC MH
+WHERE NOT EXISTS (
+  SELECT 1 FROM KETQUA KQ WHERE KQ.MaMH = MH.MaMH AND KQ.Diem < 5
+);
+
+-- 24. SV không rớt môn nào
+SELECT SV.MaSV, (SV.HoSV + N' ' + SV.TenSV) AS HoTen, SV.MaKhoa
+FROM SINHVIEN SV
+WHERE NOT EXISTS (SELECT 1 FROM KETQUA KQ WHERE KQ.MaSV = SV.MaSV AND KQ.Diem < 5);
+
+-- 25. SV rớt trên 2 môn
+SELECT SV.MaSV, SV.HoSV, SV.TenSV, SV.MaKhoa
+FROM SINHVIEN SV
+WHERE (SELECT COUNT(*) FROM KETQUA KQ WHERE KQ.MaSV = SV.MaSV AND KQ.Diem < 5) > 2;
+
+-- 26. Khoa có > 10 SV
+SELECT K.MaKhoa, K.TenKhoa, COUNT(*) AS TongSV
+FROM KHOA K
+JOIN SINHVIEN SV ON SV.MaKhoa = K.MaKhoa
+GROUP BY K.MaKhoa, K.TenKhoa
+HAVING COUNT(*) > 10;
+
+-- 27. SV thi > 4 môn
+SELECT SV.MaSV, (SV.HoSV + N' ' + SV.TenSV) AS HoTen, COUNT(KQ.MaMH) AS SoMonThi
+FROM SINHVIEN SV
+JOIN KETQUA KQ ON KQ.MaSV = SV.MaSV
+GROUP BY SV.MaSV, SV.HoSV, SV.TenSV
+HAVING COUNT(KQ.MaMH) > 4;
+
+-- 28. Khoa có >= 5 SV nam
+SELECT K.MaKhoa, K.TenKhoa, SUM(CASE WHEN SV.Phai = N'Nam' THEN 1 ELSE 0 END) AS SoSVNam
+FROM KHOA K
+JOIN SINHVIEN SV ON SV.MaKhoa = K.MaKhoa
+GROUP BY K.MaKhoa, K.TenKhoa
+HAVING SUM(CASE WHEN SV.Phai = N'Nam' THEN 1 ELSE 0 END) >= 5;
+
+-- 29. SV có điểm TB > 4
+SELECT (SV.HoSV + N' ' + SV.TenSV) AS HoTen, K.TenKhoa, SV.Phai, AVG(KQ.Diem) AS DiemTB
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+JOIN KETQUA KQ ON KQ.MaSV = SV.MaSV
+GROUP BY SV.HoSV, SV.TenSV, K.TenKhoa, SV.Phai
+HAVING AVG(KQ.Diem) > 4;
+
+-- 30. TB điểm từng môn > 6
+SELECT MH.MaMH, MH.TenMH, AVG(KQ.Diem) AS DiemTB
+FROM MONHOC MH
+JOIN KETQUA KQ ON KQ.MaMH = MH.MaMH
+GROUP BY MH.MaMH, MH.TenMH
+HAVING AVG(KQ.Diem) > 6;
+GO
+/* (Bài 3 theo PDF) */ -- :contentReference[oaicite:7]{index=7}
+
+/* ======================================
+   BÀI 4 — Tạo BẢNG từ truy vấn
+   (mỗi yêu cầu tạo 1 bảng kết quả)
+   ====================================== */
+-- Ví dụ minh hoạ tạo bảng cho 3 yêu cầu tiêu biểu:
+IF OBJECT_ID('dbo.TB_TrungBinhDiemTheoMon','U') IS NOT NULL DROP TABLE dbo.TB_TrungBinhDiemTheoMon;
+SELECT MH.MaMH, MH.TenMH, AVG(KQ.Diem) AS DiemTB
+INTO dbo.TB_TrungBinhDiemTheoMon
+FROM MONHOC MH LEFT JOIN KETQUA KQ ON KQ.MaMH = MH.MaMH
+GROUP BY MH.MaMH, MH.TenMH;
+
+IF OBJECT_ID('dbo.TB_TongSoMonThiTheoSV','U') IS NOT NULL DROP TABLE dbo.TB_TongSoMonThiTheoSV;
+SELECT SV.MaSV, (SV.HoSV + N' ' + SV.TenSV) AS HoTen, COUNT(KQ.MaMH) AS TongMonThi
+INTO dbo.TB_TongSoMonThiTheoSV
+FROM SINHVIEN SV LEFT JOIN KETQUA KQ ON KQ.MaSV = SV.MaSV
+GROUP BY SV.MaSV, SV.HoSV, SV.TenSV;
+
+IF OBJECT_ID('dbo.TB_SVKhongRotMonNao','U') IS NOT NULL DROP TABLE dbo.TB_SVKhongRotMonNao;
+SELECT SV.MaSV, (SV.HoSV + N' ' + SV.TenSV) AS HoTen, SV.MaKhoa
+INTO dbo.TB_SVKhongRotMonNao
+FROM SINHVIEN SV
+WHERE NOT EXISTS (SELECT 1 FROM KETQUA KQ WHERE KQ.MaSV = SV.MaSV AND KQ.Diem < 5);
+GO
+/* (Bài 4 theo PDF) */ -- :contentReference[oaicite:8]{index=8}
+
+/* ======================================
+   BÀI 5 — Truy vấn con (Subqueries)
+   ====================================== */
+-- 1. SV chưa thi môn nào
+SELECT MaSV, MaKhoa, Phai
+FROM SINHVIEN SV
+WHERE NOT EXISTS (SELECT 1 FROM KETQUA KQ WHERE KQ.MaSV = SV.MaSV);
+
+-- 2. SV chưa thi môn Cơ sở dữ liệu
+SELECT SV.MaSV, (SV.HoSV + N' ' + SV.TenSV) AS HoTen, SV.MaKhoa
+FROM SINHVIEN SV
+WHERE NOT EXISTS (
+   SELECT 1 FROM KETQUA KQ
+   JOIN MONHOC MH ON MH.MaMH = KQ.MaMH
+   WHERE KQ.MaSV = SV.MaSV AND MH.TenMH = N'Cơ sở dữ liệu'
+);
+
+-- 3. Môn chưa có SV thi
+SELECT MH.MaMH, MH.TenMH, MH.SoTiet
+FROM MONHOC MH
+WHERE NOT EXISTS (SELECT 1 FROM KETQUA KQ WHERE KQ.MaMH = MH.MaMH);
+
+-- 4. Khoa chưa có SV học
+SELECT K.MaKhoa, K.TenKhoa
+FROM KHOA K
+WHERE NOT EXISTS (SELECT 1 FROM SINHVIEN SV WHERE SV.MaKhoa = K.MaKhoa);
+
+-- 5. SV khoa Anh văn chưa thi CSDL
+SELECT SV.*
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+WHERE K.TenKhoa = N'Anh văn'
+  AND NOT EXISTS (
+        SELECT 1 FROM KETQUA KQ
+        JOIN MONHOC MH ON MH.MaMH = KQ.MaMH
+        WHERE KQ.MaSV = SV.MaSV AND MH.TenMH = N'Cơ sở dữ liệu'
+  );
+
+-- 6. Môn chưa có SV khoa Lý thi
+SELECT MH.*
+FROM MONHOC MH
+WHERE NOT EXISTS (
+  SELECT 1 FROM KETQUA KQ
+  JOIN SINHVIEN SV ON SV.MaSV = KQ.MaSV
+  JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+  WHERE K.TenKhoa = N'Lý' AND KQ.MaMH = MH.MaMH
+);
+
+-- 7. SV có điểm Đồ hoạ < điểm Đồ hoạ nhỏ nhất của SV khoa Tin học
+SELECT DISTINCT SV.*
+FROM SINHVIEN SV
+JOIN KETQUA KQ ON KQ.MaSV = SV.MaSV
+JOIN MONHOC MH ON MH.MaMH = KQ.MaMH
+WHERE MH.TenMH = N'Đồ hoạ'
+  AND KQ.Diem < (
+       SELECT MIN(KQ2.Diem)
+       FROM KETQUA KQ2
+       JOIN SINHVIEN SV2 ON SV2.MaSV = KQ2.MaSV
+       JOIN KHOA K2 ON K2.MaKhoa = SV2.MaKhoa
+       JOIN MONHOC MH2 ON MH2.MaMH = KQ2.MaMH
+       WHERE K2.TenKhoa = N'Tin học' AND MH2.TenMH = N'Đồ hoạ'
+  );
+
+-- 8. SV sinh sau SV nhỏ tuổi nhất trong khoa Anh văn
+SELECT *
+FROM SINHVIEN
+WHERE NgaySinh > (
+  SELECT MIN(NgaySinh) FROM SINHVIEN SV
+  JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+  WHERE K.TenKhoa = N'Anh văn'
+);
+
+-- 9. SV có học bổng > tổng học bổng SV khoa Triết
+SELECT * FROM SINHVIEN
+WHERE HocBong > (
+  SELECT SUM(ISNULL(HocBong,0))
+  FROM SINHVIEN SV
+  JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+  WHERE K.TenKhoa = N'Triết'
+);
+
+-- 10. SV có nơi sinh trùng với nơi sinh của SV học bổng lớn nhất khoa Lý
+SELECT * FROM SINHVIEN
+WHERE NoiSinh IN (
+  SELECT TOP(1) NoiSinh
+  FROM SINHVIEN SV
+  JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+  WHERE K.TenKhoa = N'Lý'
+  ORDER BY HocBong DESC
+);
+
+-- 11. SV có điểm cao nhất ứng với mỗi môn
+WITH MaxD AS (
+  SELECT MaMH, MAX(Diem) AS MaxDiem FROM KETQUA GROUP BY MaMH
+)
+SELECT SV.MaSV, (SV.HoSV + N' ' + SV.TenSV) AS HoTen, MH.TenMH, KQ.Diem
+FROM KETQUA KQ
+JOIN MaxD M ON M.MaMH = KQ.MaMH AND M.MaxDiem = KQ.Diem
+JOIN SINHVIEN SV ON SV.MaSV = KQ.MaSV
+JOIN MONHOC MH ON MH.MaMH = KQ.MaMH;
+
+-- 12. Các SV có học bổng cao nhất theo từng khoa
+WITH MaxHB AS (
+  SELECT MaKhoa, MAX(ISNULL(HocBong,0)) AS MaxHB FROM SINHVIEN GROUP BY MaKhoa
+)
+SELECT SV.MaSV, K.TenKhoa, SV.HocBong
+FROM SINHVIEN SV
+JOIN MaxHB M ON M.MaKhoa = SV.MaKhoa AND M.MaxHB = ISNULL(SV.HocBong,0)
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa;
+GO
+/* (Bài 5 theo PDF) */ -- :contentReference[oaicite:9]{index=9}
+
+/* ======================================
+   BÀI 6 — Thêm dữ liệu
+   ====================================== */
+-- 1. Thêm SV C01
+INSERT INTO SINHVIEN (MaSV, HoSV, TenSV, Phai, NgaySinh, NoiSinh, MaKhoa, HocBong)
+VALUES (N'C01', N'Lê Thành', N'Nguyên', N'Nam', '1980-10-20', N'Thành phố Hồ Chí Minh', N'TH', 850000);
+
+-- 2. Thêm môn 06
+INSERT INTO MONHOC (MaMH, TenMH, SoTiet)
+VALUES (N'06', N'Xử lý ảnh', 45);
+
+-- 3. Thêm khoa CT
+INSERT INTO KHOA (MaKhoa, TenKhoa)
+VALUES (N'CT', N'Công trình');
+
+-- 4. Thêm SV C02 (Ngày sinh lấy ngày hiện hành)
+INSERT INTO SINHVIEN (MaSV, HoSV, TenSV, Phai, NgaySinh, NoiSinh, MaKhoa, HocBong)
+VALUES (N'C02', N'Nguyễn Trần', N'Quân', N'Nam', CONVERT(date, GETDATE()), N'Huế', N'CT', 950000);
+
+-- 5. Thêm vào KETQUA: tất cả SV khoa Tin học — MaMH=06 — Diem=7
+INSERT INTO KETQUA (MaSV, MaMH, Diem)
+SELECT SV.MaSV, N'06', 7
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+WHERE K.TenKhoa = N'Tin học';
+
+-- 6. Thêm vào KETQUA: MaSV=C02 — tất cả các môn — Diem=8
+INSERT INTO KETQUA (MaSV, MaMH, Diem)
+SELECT N'C02', MH.MaMH, 8
+FROM MONHOC MH;
+GO
+/* (Bài 6 theo PDF) */ -- :contentReference[oaicite:10]{index=10} :contentReference[oaicite:11]{index=11}
+
+/* ======================================
+   BÀI 7 — Xoá dữ liệu (tạo bảng DeleteTable trước)
+   ====================================== */
+IF OBJECT_ID('dbo.DeleteTable','U') IS NOT NULL DROP TABLE dbo.DeleteTable;
+SELECT SV.MaSV, (SV.HoSV + N' ' + SV.TenSV) AS HoTen, SV.Phai, SV.NgaySinh, SV.NoiSinh,
+       K.TenKhoa, SV.HocBong
+INTO dbo.DeleteTable
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa;
+
+-- 2. Xoá SV không có học bổng
+DELETE FROM dbo.DeleteTable WHERE ISNULL(HocBong,0) = 0;
+
+-- 3. Xoá SV sinh đúng 20/12/1987
+DELETE FROM dbo.DeleteTable WHERE CONVERT(date, NgaySinh) = '1987-12-20';
+
+-- 4. Xoá SV sinh trước tháng 3/1987
+DELETE FROM dbo.DeleteTable
+WHERE YEAR(NgaySinh) < 1987 OR (YEAR(NgaySinh) = 1987 AND MONTH(NgaySinh) < 3);
+
+-- 5. Xoá tất cả SV nam của khoa Tin học
+DELETE DT
+FROM dbo.DeleteTable DT
+WHERE DT.Phai = N'Nam' AND DT.TenKhoa = N'Tin học';
+GO
+/* (Bài 7 theo PDF) */ -- :contentReference[oaicite:12]{index=12}
+
+/* ======================================
+   BÀI 8 — Cập nhật dữ liệu
+   ====================================== */
+-- 1. Sửa số tiết môn Văn phạm = 45
+UPDATE MONHOC SET SoTiet = 45 WHERE TenMH = N'Văn phạm';
+
+-- 2. Đổi tên SV Trần Thanh Mai -> Trần Thanh Kỳ
+UPDATE SINHVIEN SET TenSV = N'Kỳ'
+WHERE HoSV = N'Trần Thanh' AND TenSV = N'Mai';
+
+-- 3. Cập nhật phái của SV Trần Thanh Kỳ thành Nam
+UPDATE SINHVIEN SET Phai = N'Nam'
+WHERE HoSV = N'Trần Thanh' AND TenSV = N'Kỳ';
+
+-- 4. Cập nhật ngày sinh của SV "Trần thị thu Thuỷ" -> 05/07/1990
+UPDATE SINHVIEN SET NgaySinh = '1990-07-05'
+WHERE HoSV = N'Trần thị thu' AND TenSV = N'Thuỷ';
+
+-- 5. Tăng học bổng cho tất cả SV khoa Anh văn +100,000
+UPDATE SV
+SET SV.HocBong = ISNULL(SV.HocBong,0) + 100000
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+WHERE K.TenKhoa = N'Anh văn';
+
+-- 6. Cộng thêm 5 điểm môn Trí Tuệ Nhân Tạo cho SV khoa Anh văn (tối đa 10)
+UPDATE KQ
+SET KQ.Diem = CASE WHEN KQ.Diem + 5 > 10 THEN 10 ELSE KQ.Diem + 5 END
+FROM KETQUA KQ
+JOIN SINHVIEN SV ON SV.MaSV = KQ.MaSV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+JOIN MONHOC MH ON MH.MaMH = KQ.MaMH
+WHERE K.TenKhoa = N'Anh văn' AND MH.TenMH = N'Trí Tuệ Nhân Tạo';
+
+-- 7. Tăng học bổng theo mô tả
+UPDATE SV
+SET HocBong = ISNULL(HocBong,0) +
+              CASE
+                WHEN SV.Phai = N'Nữ' AND K.TenKhoa = N'Anh văn' THEN 100000
+                WHEN SV.Phai = N'Nam' AND K.TenKhoa = N'Tin học' THEN 150000
+                ELSE 50000
+              END
+FROM SINHVIEN SV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa;
+
+-- 8. Điều chỉnh điểm Cơ sở dữ liệu theo khoa
+UPDATE KQ
+SET KQ.Diem =
+    CASE
+      WHEN K.TenKhoa = N'Anh văn' THEN CASE WHEN KQ.Diem + 2 > 10 THEN 10 ELSE KQ.Diem + 2 END
+      WHEN K.TenKhoa = N'Tin học'  THEN CASE WHEN KQ.Diem - 1 < 0  THEN 0  ELSE KQ.Diem - 1 END
+      ELSE KQ.Diem
+    END
+FROM KETQUA KQ
+JOIN SINHVIEN SV ON SV.MaSV = KQ.MaSV
+JOIN KHOA K ON K.MaKhoa = SV.MaKhoa
+JOIN MONHOC MH ON MH.MaMH = KQ.MaMH
+WHERE MH.TenMH = N'Cơ sở dữ liệu';
+GO
+/* (Bài 8 theo PDF) */ -- :contentReference[oaicite:13]{index=13}

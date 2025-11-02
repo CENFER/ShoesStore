@@ -1,0 +1,339 @@
+﻿@using ShoesStore.ViewModels
+@model PhieuMuaViewModel
+@{
+    decimal tongtien = 0;
+}
+<style>
+    .iconPurchase{
+        font-size: 35px;
+    }
+    .checkform_box {
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        padding: 15px;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .checkform_box:hover {
+        border-color: #007bff;
+    }
+
+    .checkOn{
+        border-color: #007bff;
+    }
+
+    .checkOn .form-check-input:checked + .form-check-label  {
+        border-color: #007bff;
+        color:#231F20;
+    }
+
+    .imgProduct {
+        max-height: 60px;
+        max-width: 60px;
+    }
+
+    .addressBlock {
+        width: 550px;
+        height: 75px;
+        border-radius: 3px;
+        border: solid 1px #ccc;
+        background-color: #FFFFFF;
+        padding: 10px;
+        margin-bottom: 10px;
+        position: relative; /* Add position relative for absolute positioning */
+    }
+
+        /* Define hover effect for addressBlock */
+        .addressBlock:hover {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Example hover effect */
+        }
+
+        /* Position the Choose button */
+        .addressBlock .btn-choose {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+    .voucher-slider-container {
+        overflow: hidden;
+    }
+
+    .voucher-slider {
+        display: flex;
+    }
+
+    .voucher-details {
+        flex: 0 0 auto;
+        margin-right: 20px;
+        transition: transform 0.5s ease;
+    }
+
+    /* You may want to add more styling as per your design requirements */
+
+
+    /* You may want to add more styling as per your design requirements */
+
+
+    .coinWelcome{
+        background-color: #F1F1F1;
+        border-radius:5px;
+        padding:20px;
+        margin-bottom:15px;
+    }
+   
+</style>
+
+<script>
+    function passMaptttOnClick(mapttt) {
+        console.log("Mapttt: ", mapttt);
+
+        var allCheckboxes = document.querySelectorAll('input[name="flexRadioDefault"]');
+        allCheckboxes.forEach(function (checkbox) {
+            checkbox.parentNode.parentNode.classList.remove('checkOn');
+        });
+
+        var checkBox = document.getElementById('check(' + mapttt + ')');
+        checkBox.checked = true;
+        checkBox.parentNode.parentNode.classList.add('checkOn');
+        document.getElementById('MaptttHidden').value = mapttt;
+    }
+
+    $(document).ready(function () {
+        $('.changeAddress').click(function () {
+            var masodiachiView = $(this).attr('value');
+            $.ajax({
+                url: '/PhieuMua/ChangeAddressPhieuMua',
+                type: 'Get',
+                data: {
+                    masodiachi: masodiachiView
+                },
+                success:function(response){
+                    console.log("Hotten : " + response);
+                    console.dir(response);
+                    $('#HoTenInput').val(response.hoTen);
+                    $('#SdtInput').val(response.sdt);
+                    $('#DiachiInput').val(response.diachi);
+                    $('#selectTinh').val(response.maTinh);
+                    
+
+                    var selectQuan = $('#selectQuan');
+                    var selectWard = $('#selectPhuong');
+
+                    selectQuan.empty();
+                    selectQuan.append('<option value="">Choose District</option>');
+
+                    selectWard.empty();
+                    selectWard.append('<option value="">Choose Ward/Commune</option>');
+                    $.each(response.selectQuan, function (index, item) {
+                        selectQuan.append($('<option>', {
+                            value: item.value,
+                            text: item.text
+                        }));
+                    });
+
+                    $.each(response.selectPhuong, function (index, item) {
+                        selectWard.append($('<option>', {
+                            value: item.value,
+                            text: item.text
+                        }));
+                    });
+
+                    $('#selectQuan').val(response.maQuan);
+                    $('#selectPhuong').val(response.maPhuong);
+                }
+            });
+        });
+    });
+
+</script>
+<!-- Start Header Area -->
+<!-- End Header Area -->
+<!-- Start Banner Area -->
+<section class="banner-area organic-breadcrumb">
+    <div class="container">
+        <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+            <div class="col-first">
+                <h1>Checkout</h1>
+                <nav class="d-flex align-items-center">
+                    <a href="index.html">Home<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="single-product.html">Checkout</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End Banner Area -->
+<!--================Checkout Area =================-->
+<section class="checkout_area section_gap">
+    <div class="container">
+
+        <div class="billing_details">
+            <div class="row">
+                <form class="row contact_form" asp-action="ThanhToan" method="post" novalidate="novalidate">
+                    <input asp-for="@Model.khInfo.Makh" value="@Model.khInfo?.Makh" hidden />
+                    <input asp-for="@Model.khInfo.Ngaysinh" value="@Model.khInfo?.Ngaysinh" hidden />
+                    <div class="col-lg-7">
+                        <div class="coinWelcome" >
+                            @if (Model.khInfo != null)
+                            {
+                                <h1>Hi, @Model.khInfo?.Tenkh</h1>
+                            }
+                            else
+                            {
+                                <h1><a style="text-decoration:underline" asp-action="Login" asp-controller="Account" asp-route-backToPage="thanhtoan">Login</a> to receive coin</h1>
+                            }
+                            <h3 style="border: none;
+                                    margin: 0;font-size:16px;">
+                                Order (@Model.listcartItem.Count() products) <strong style="color:#2F5ACF" id="strongFirstPrice">@Model.totalCost.ToString("#,##0")₫</strong>
+                            </h3>
+                            <h3 style="border: none;
+                                    margin: 0;padding-bottom:0;font-size:16px;">
+                                Get coin <strong style="color:#2F5ACF"><i class="bi bi-coin"></i> <span id="coinWelcomeNum">@Model.coinGet.ToString("#,##0") Karma Coin</span></strong>
+                            </h3>
+                        </div>
+                        <div class="row" style="border-bottom:solid 1px #ccc;display:flex;align-items:center">
+                            <div class="col-6">
+                                <h2 >Shipping info</h2>
+                            </div>
+                            @if(Model.khInfo != null)
+                            {
+                                <div class="col-6">
+                                    <a data-toggle="modal" data-target="#exampleModal"
+                                       style="cursor:pointer;" class="float-right">
+                                        <i class="bi bi-journal-bookmark-fill"></i>
+                                        <span style="text-decoration:underline;color:orange">Choose from address notebook</span>
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document" style="max-width:575px">
+                                <div class="modal-content">
+                                    <div class="modal-header text-center">
+                                        <h5 class="modal-title" id="exampleModalLabel">Address Notebook</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        @foreach (var address in Model.sodiachis)
+                                        {
+                                            <div class="addressBlock">
+                                                <p style="font-size:14px;font-weight:500;color:#222222;margin-bottom:6px">@address.Tennguoinhan @address.Sdtnguoinhan</p>
+                                                <p style="font-size:14px;font-weight:500;color:#222222">@address.Diachi</p>
+                                                <a class="btn btn-info btn-choose changeAddress" style="color:white" value="@address.Masodiachi">Choose</a>
+                                            </div>
+                                        }
+
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="row contact_form" novalidate="novalidate">
+                            <partial name="_PartialViewOrderDetail" model="Model"/>
+
+                            <div class="col-md-12 form-group p_star">
+                                <label for="exampleFormControlInput1" class="form-label" asp-for="@Model.GhiChu"><strong>Note</strong></label>
+                                <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="Note" asp-for="@Model.GhiChu">
+                                <span asp-validation-for="@Model.GhiChu" class="text-danger"></span>
+                            </div>
+                        </div>
+                    
+                        <div class="row mb-3" style="border-bottom:solid 1px #ccc;display:flex;align-items:center">
+                            <div class="col-6">
+                                <h2>Method purchase</h2>
+                            </div>
+                        
+                        </div>
+                        
+
+                        <input id="MaptttHidden" asp-for="@Model.Mapttt" hidden />
+                        @foreach (Phuongthucthanhtoan pttt in ViewBag.MethodPurchase)
+                        {
+                            <div class="checkform_box mb-3" id="div(@pttt.Mapttt)" onclick="passMaptttOnClick('@pttt.Mapttt')">
+                                <div class="form-check d-flex align-items-center">
+                                    <input class="form-check-input"
+                                           onclick="passMaptttOnClick('@pttt.Mapttt')"
+                                           type="radio"
+                                           name="flexRadioDefault"
+                                           id="check(@pttt.Mapttt)"
+                                           style="width: 16px; height: 16px;">
+                                    <label class="form-check-label d-flex align-items-center" asp-for="@Model.Mapttt">
+                                        <span class="mr-2 ml-2">
+                                            <!-- Icon for COD -->
+                                            @if (pttt.Mapttt == 2)
+                                            {
+                                                <i class="fa fa-cc-paypal iconPurchase"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-truck iconPurchase"></i>
+                                            }
+                                        </span>
+                                        @pttt.Tenphuongthuc
+                                    </label>
+                                </div>
+                            </div>
+
+
+
+                        }
+
+
+                        <span asp-validation-for="@Model.Mapttt" class="text-danger"></span>
+
+                            <button class="primary-btn text-center" type="submit" style="width:100%">Confirm checkout</button>
+                    </div>
+                    <div class="col-lg-5">
+
+                        <div class="order_box">
+                            <h2>YOUR ORDER</h2>
+                            <ul class="list">
+                                <li><a href="#">Products<span>Total cost</span></a></li>
+                                @foreach (ShoppingCartItem shopcartItem in Model.listcartItem)
+                                {
+                                    <li class="d-flex align-items-center mb-1">
+                                        <div class="img-container" style="margin-right:10px">
+                                            <img class="imgProduct" src="~/img/@shopcartItem.sanpham.Madongsanpham/@shopcartItem.sanpham.Anhdaidien" alt="@shopcartItem.Name">
+                                        </div>
+                                        <div class="product-details" style="flex:1">
+                                            <span>@shopcartItem.Name</span>
+                                            <div>Color: @shopcartItem.TenMau</div>
+                                            <div>Size: @shopcartItem.Size <span class="middle">Qty: @shopcartItem.Quantity</span></div>
+                                        </div>
+                                        <div class="quantity-price ml-auto">
+                                            @{
+                                                decimal tiensp;
+                                                if (shopcartItem.PhanTramGiam != 1)
+                                                {
+                                                    tiensp = shopcartItem.Quantity * (shopcartItem.GiaGoc - (shopcartItem.GiaGoc * shopcartItem.PhanTramGiam / 100));
+                                                }
+                                                else
+                                                {
+                                                    tiensp = shopcartItem.Quantity * shopcartItem.GiaGoc;
+                                                }
+                                                tongtien += tiensp;
+                                            }
+                                            <span class="last">@(tiensp.ToString("#,##0"))₫</span>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+
+                            <partial name="_PartialViewPriceDetail" model="Model" />
+
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+<!--================End Checkout Area =================-->

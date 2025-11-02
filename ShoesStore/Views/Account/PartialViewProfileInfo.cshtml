@@ -1,0 +1,58 @@
+﻿@model ShoesStore.Models.Khachhang
+<div class="mb-4">
+    <div class="row">
+        <div class="col-6">
+            <h3 class="mb-4">Account information</h3>
+        </div>
+        <div class="d-flex justify-content-end col-6">
+            <h3 style="border: none;
+                                    margin: 0;padding-bottom:0;font-size:16px;">
+                <strong style="color:#2F5ACF"><i class="bi bi-coin"></i> <span id="coinWelcomeNum">@Model.Tongxu.ToString("#,##0") Karma Coin</span></strong>
+            </h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3">
+            <p class="mb-0">User name</p>
+        </div>
+        <div class="col-sm-9">
+            <p class="text-muted mb-0">@Model.Tenkh</p>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-sm-3">
+            <p class="mb-0">Email</p>
+        </div>
+        <div class="col-sm-9">
+            <p class="text-muted mb-0">@Model.Email</p>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-sm-3">
+            <p class="mb-0">Phone number</p>
+        </div>
+        <div class="col-sm-9">
+            <p class="text-muted mb-0">@Model.Sdt</p>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-sm-3">
+            <p class="mb-0">Gender</p>
+        </div>
+        <div class="col-sm-9">
+            <p class="text-muted mb-0">@(Model.Gioitinh == true ? "Male" : "Female")</p>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-sm-3">
+            <p class="mb-0">Birth</p>
+        </div>
+        <div class="col-sm-9">
+            <p class="text-muted mb-0">@(Model.Ngaysinh != null ? Model.Ngaysinh.Value.ToString("dd/MM/yyyy") : "")</p>
+        </div>
+    </div>
+</div>

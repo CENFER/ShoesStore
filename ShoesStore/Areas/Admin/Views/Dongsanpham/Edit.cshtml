@@ -1,0 +1,44 @@
+﻿@model ShoesStore.Models.Dongsanpham
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<div class="col-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Edit Shoes</h4>
+
+            <form asp-action="Edit" method="post" id="createForm">
+                <input asp-for="MaloaiNavigation.Maloai" value="0" hidden />
+                <input asp-for="MaloaiNavigation.Tenloai" value="0" hidden />
+
+
+                <div class="form-group">
+                    <label asp-for="Tendongsp">Shoes Name</label>
+                    <input asp-for="Tendongsp" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="Maloai">Shoes Category</label>
+                    <select asp-for="Maloai" class="form-control" asp-items="ViewBag.Selectloai"></select>
+                    <span asp-validation-for="Maloai" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Giagoc">Price</label>
+                    <input asp-for="Giagoc" class="form-control" type="number" step="0.01" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="Mota">Description</label>
+                    <textarea asp-for="Mota" class="form-control" rows="4"></textarea>
+                </div>
+               
+
+                <!-- Button type="submit" đã được di chuyển ra ngoài form -->
+                <a href="@Url.Action("Index", "Dongsanpham")" class="btn btn-light">Cancel</a>
+                <button type="submit" class="btn btn-gradient-primary me-2">Edit</button>
+            </form>
+        </div>
+    </div>
+</div>
+

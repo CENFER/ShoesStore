@@ -1,0 +1,80 @@
+﻿@using ShoesStore.Models
+@model List<Sanpham>
+@{
+    int count = 0;
+}
+
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Dongsanpham">Shoes List</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Shoes Detail List</li>
+    </ol>
+</nav>
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">Shoes List</h4>
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Shoes Name: @TempData["Tendongsp"]</h3>
+            </div>
+            <div class="col-md-6 text-right">
+                <h3>Shoes Category: @TempData["TenLoai"]</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <a asp-action="Index" asp-controller="Dongsanpham" class="btn btn-secondary">Back to Shoes List</a>
+            </div>
+            <div class="col-md-6 text-right">
+                <a asp-action="AddSanPham" asp-controller="SanPhamAdmin" asp-route-madongsp="@TempData["madongsp"]" class="btn btn-primary mb-3">Create shoes detail</a>
+            </div>
+        </div>
+
+
+        <table class="table text-center">
+            <thead>
+                <tr>
+                    <th>Index</th>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Color</th>
+                    <th>Color Name</th>
+                    <th>State</th>
+                    <th>Total Quantity</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Sanpham ctSp in Model)
+                {
+                    <tr>
+                        <td>@(++count)</td>
+                        <td>
+                            <img src="~/img/@ctSp.Madongsanpham/@ctSp.Anhdaidien" style="height:100px;width:100px;border-radius:3px;" class="img-fluid">
+                        </td>
+                        <td>@TempData["Tendongsp"]</td>
+                        <td>
+                            <div style="height: 30px; width: 30px; background-color: @ctSp.Mamau;"></div>
+                        </td>
+                        <td>@ctSp.MamauNavigation.Tenmau</td>
+                        <td>@ctSp.TrangThai</td>
+                        <td>@ctSp.Sanphamsizes.Sum(x => x.Slton)</td>
+                        <td>
+                            <a class="btn btn-info mr-1 btn-sm" asp-action="UpdateSanPham" asp-controller="SanPhamAdmin" asp-route-masp="@ctSp.Masp" class="btn btn-sm btn-info">
+                                <i class="fas fa-pen"></i>
+                            </a>
+                            <a asp-action="DeleteSanPham" asp-controller="SanPhamAdmin" asp-route-masp="@ctSp.Masp"
+                               class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

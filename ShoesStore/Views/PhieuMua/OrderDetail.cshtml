@@ -1,0 +1,36 @@
+﻿@model ShoesStore.Models.Phieumua
+
+<h3>Order Details</h3>
+<div>
+    <h4>Order ID: @Model.Mapm</h4>
+    <p>Date Placed: @Model.Ngaydat.ToString("dd/MM/yyyy")</p>
+    <p>Status: @Model.Tinhtrang</p>
+    <p>Total Amount: @Model.Tongtien?.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</p>
+    <h4>Order Items</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Size</th>
+                <th>Color</th>
+                <th>Unit Price</th>
+                <th>Total Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Chitietphieumuas)
+            {
+                var totalPrice = item.Soluong * item.Dongia;
+                <tr>
+                    <td>@item.MaspsizeNavigation.MaspNavigation.MadongsanphamNavigation.Tendongsp</td>
+                    <td>@item.Soluong</td>
+                    <td>@item.MaspsizeNavigation.MasizeNavigation.Tensize</td>
+                    <td>@item.MaspsizeNavigation.MaspNavigation.MamauNavigation.Tenmau</td>
+                    <td>@item.Dongia.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</td>
+                    <td>@totalPrice.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
