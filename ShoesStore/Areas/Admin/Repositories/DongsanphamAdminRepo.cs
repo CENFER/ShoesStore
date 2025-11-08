@@ -27,8 +27,18 @@ namespace ShoesStore.Areas.Admin.Repositories
                 Tendongsp = dongsanpham.Tendongsp,
                 Giagoc = dongsanpham.Giagoc,
                 Mota = dongsanpham.Mota,
-                Sanphams = _context.Sanphams.Where(x=>x.Madongsanpham == dongsanpham.Madongsanpham).ToList(),
-                MaloaiNavigation = _context.Loais.FirstOrDefault(x=>x.Maloai==dongsanpham.Maloai)
+                
+                Sanphams = _context.Sanphams
+                .Where(x => x.Madongsanpham == dongsanpham.Madongsanpham)
+                .ToList() ?? new List<Sanpham>(),
+
+                // Nếu không tìm thấy loại thì tạo tạm object trống để tránh null
+                MaloaiNavigation = _context.Loais
+                .FirstOrDefault(x => x.Maloai == dongsanpham.Maloai)
+                ?? new Loai { Tenloai = "Không xác định" }
+                //Lỗi NULL khi lấy danh sách sản phẩm
+                // Sanphams = _context.Sanphams.Where(x=>x.Madongsanpham == dongsanpham.Madongsanpham).ToList(),
+                // MaloaiNavigation = _context.Loais.FirstOrDefault(x=>x.Maloai==dongsanpham.Maloai)
             }).OrderByDescending(x=>x.Madongsanpham);
 
             return dsp;

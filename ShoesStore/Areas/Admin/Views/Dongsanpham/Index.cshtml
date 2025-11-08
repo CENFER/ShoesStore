@@ -67,7 +67,7 @@
                         <a asp-action="Edit" asp-controller="Dongsanpham" asp-route-id="@item.Madongsanpham" class="btn btn-gradient-primary">
                             <i class="mdi mdi-table-edit"></i>
                         </a>
-                        <form asp-controller="Loai" asp-action="Delete" asp-route-id="@item.Maloai" method="post" class="d-inline">
+                        <form asp-controller="Dongsanpham" asp-action="Delete" asp-route-id="@item.Madongsanpham" method="post" class="d-inline">
                             <button type="submit" class="btn btn-gradient-danger">
                                 <i class="mdi mdi-delete"></i>
                             </button>
