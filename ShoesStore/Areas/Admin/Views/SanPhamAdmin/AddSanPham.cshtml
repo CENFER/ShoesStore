@@ -5,6 +5,15 @@
 }
 
 <h1>Create New Shoes Detail</h1>
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success text-center">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger text-center">@TempData["Error"]</div>
+}
+
 
 <form asp-action="AddSanPham" asp-controller="SanPhamAdmin" method="post" enctype="multipart/form-data">
     <input asp-for="DongsanphamId" hidden />

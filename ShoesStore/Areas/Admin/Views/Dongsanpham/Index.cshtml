@@ -3,6 +3,22 @@
 @{
     ViewData["title"] = "Product line page";
 }
+<!-- Hiển thị thông báo -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+        <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+        <i class="fas fa-times-circle me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
 
@@ -59,20 +75,39 @@
                     <td>@item.Tendongsp</td>
                     <td>@item.MaloaiNavigation.Tenloai</td>
                     <td>@($"{item.Giagoc:#,##0}₫")</td>
-                    
+
                     <td>
-                        <a asp-action="SanPhamList" asp-controller="SanPhamAdmin" asp-route-madongsp="@item.Madongsanpham" class="btn btn-gradient-info">
-                            <i class="mdi mdi-information"></i>
-                        </a>
-                        <a asp-action="Edit" asp-controller="Dongsanpham" asp-route-id="@item.Madongsanpham" class="btn btn-gradient-primary">
-                            <i class="mdi mdi-table-edit"></i>
-                        </a>
-                        <form asp-controller="Dongsanpham" asp-action="Delete" asp-route-id="@item.Madongsanpham" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-gradient-danger">
+                        <div class="d-flex justify-content-center gap-2">
+                            <a asp-action="SanPhamList"
+                               asp-controller="SanPhamAdmin"
+                               asp-route-madongsp="@item.Madongsanpham"
+                               class="btn btn-gradient-info d-flex align-items-center justify-content-center"
+                               style="width:40px; height:40px;"
+                               title="Details">
+                                <i class="mdi mdi-information"></i>
+                            </a>
+
+                            <a asp-action="Edit"
+                               asp-controller="Dongsanpham"
+                               asp-route-id="@item.Madongsanpham"
+                               class="btn btn-gradient-primary d-flex align-items-center justify-content-center"
+                               style="width:40px; height:40px;"
+                               title="Edit">
+                                <i class="mdi mdi-table-edit"></i>
+                            </a>
+
+                            <a asp-action="Delete"
+                               asp-controller="Dongsanpham"
+                               asp-route-id="@item.Madongsanpham"
+                               class="btn btn-gradient-danger d-flex align-items-center justify-content-center"
+                               style="width:40px; height:40px;"
+                               onclick="return confirm('Bạn có chắc chắn muốn xóa dòng sản phẩm này không?');"
+                               title="Delete">
                                 <i class="mdi mdi-delete"></i>
-                            </button>
-                        </form>
+                            </a>
+                        </div>
                     </td>
+
 
                 </tr>
         }

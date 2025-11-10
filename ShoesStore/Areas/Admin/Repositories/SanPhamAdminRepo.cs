@@ -42,12 +42,42 @@ namespace ShoesStore.Areas.Admin.Repositories
 			return ctsp;
 		}
 
-		public void DeleteChitietSp(int masp)
-		{
-			Sanpham ctsp = context.Sanphams.FirstOrDefault(x => x.Masp == masp);
-			context.Sanphams.Remove(ctsp);
-			context.SaveChanges();
-		}
+        public void DeleteChitietSp(int masp)
+        {
+            try
+            {
+                var sp = context.Sanphams
+                    .Include(x => x.Sanphamsizes)
+                    .FirstOrDefault(x => x.Masp == masp);
+
+                if (sp == null)
+                {
+                    Console.WriteLine($"Không tìm thấy sản phẩm có mã {masp}");
+                    return;
+                }
+
+                // Xóa dữ liệu tồn kho liên quan (nếu có)
+                if (sp.Sanphamsizes != null && sp.Sanphamsizes.Any())
+                {
+                    context.Sanphamsizes.RemoveRange(sp.Sanphamsizes);
+                }
+
+                // Xóa bản ghi sản phẩm chính
+                context.Sanphams.Remove(sp);
+
+                // Thực thi
+                context.SaveChanges();
+                Console.WriteLine($"Đã xóa sản phẩm có mã {masp}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi xóa sản phẩm {masp}: {ex.Message}");
+                throw;
+            }
+        }
+
+
+
 
         public void UpdateChitietSp(Sanpham sp)
 		{

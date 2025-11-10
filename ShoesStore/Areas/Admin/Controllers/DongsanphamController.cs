@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using ShoesStore.Areas.Admin.InterfaceRepositories;
 using ShoesStore.Models;
 using ShoesStore.Models.Authentication;
-using System.Diagnostics;
-using System.Linq;
 
 namespace ShoesStore.Areas.Admin.Controllers
 {
@@ -13,22 +11,18 @@ namespace ShoesStore.Areas.Admin.Controllers
     public class DongsanphamController : Controller
     {
         private readonly IDongsanphamAdmin _dongsanphamRepo;
-
         private readonly ILoaiAdmin _loairepo;
-
-
 
         public DongsanphamController(IDongsanphamAdmin dongsanphamRepo, ILoaiAdmin loairepo)
         {
             _dongsanphamRepo = dongsanphamRepo;
             _loairepo = loairepo;
-
         }
-
 
         public IActionResult Index()
         {
-            return View(_dongsanphamRepo.GetAllDongsanpham().ToList());
+            var list = _dongsanphamRepo.GetAllDongsanpham().ToList();
+            return View(list);
         }
 
         private SelectList GetSelectListItems()
@@ -39,7 +33,6 @@ namespace ShoesStore.Areas.Admin.Controllers
 
         public IActionResult Create()
         {
-
             ViewBag.Selectloai = GetSelectListItems();
             return View();
         }
@@ -48,24 +41,37 @@ namespace ShoesStore.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Dongsanpham dongsanpham)
         {
-            dongsanpham.MaloaiNavigation = null;
-            var loaiList = _loairepo.GetAllLoai().ToList();
-            ViewBag.Selectloai = new SelectList(loaiList, "Maloai", "Tenloai", dongsanpham.Maloai);
-            if (ModelState.IsValid)
+            try
             {
-                _dongsanphamRepo.AddDongsanpham(dongsanpham);
+                if (ModelState.IsValid)
+                {
+                    dongsanpham.MaloaiNavigation = null;
+                    _dongsanphamRepo.AddDongsanpham(dongsanpham);
+                    TempData["Success"] = "Đã thêm dòng sản phẩm mới thành công!";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                TempData["Error"] = "Vui lòng kiểm tra lại dữ liệu nhập vào.";
+                ViewBag.Selectloai = GetSelectListItems();
+                return View(dongsanpham);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Lỗi khi thêm dòng sản phẩm: " + ex.Message;
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.Selectloai = GetSelectListItems();
-            return View(dongsanpham);
         }
 
         public IActionResult Edit(int id)
         {
             var dongsanpham = _dongsanphamRepo.GetDongsanphamById(id);
-            var loaiList = _loairepo.GetAllLoai().ToList();
-            ViewBag.Selectloai = new SelectList(loaiList, "Maloai", "Tenloai", dongsanpham.Maloai);
+            if (dongsanpham == null)
+            {
+                TempData["Error"] = "Không tìm thấy dòng sản phẩm cần sửa.";
+                return RedirectToAction(nameof(Index));
+            }
 
+            ViewBag.Selectloai = GetSelectListItems();
             return View(dongsanpham);
         }
 
@@ -73,20 +79,38 @@ namespace ShoesStore.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Dongsanpham dongsanpham, int id)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _dongsanphamRepo.UpdateDongsanpham(dongsanpham, id);
+                if (ModelState.IsValid)
+                {
+                    _dongsanphamRepo.UpdateDongsanpham(dongsanpham, id);
+                    TempData["Success"] = "Đã cập nhật dòng sản phẩm thành công!";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                TempData["Error"] = "Dữ liệu không hợp lệ, vui lòng kiểm tra lại.";
+                return View(dongsanpham);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Lỗi khi cập nhật: " + ex.Message;
                 return RedirectToAction(nameof(Index));
             }
-            return View(dongsanpham);
         }
-
-
 
         [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
-            _dongsanphamRepo.DeleteDongsanpham(id);
+            try
+            {
+                _dongsanphamRepo.DeleteDongsanpham(id);
+                TempData["Success"] = "Đã xóa dòng sản phẩm thành công!";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Lỗi khi xóa dòng sản phẩm: " + ex.Message;
+            }
+
             return RedirectToAction(nameof(Index));
         }
     }

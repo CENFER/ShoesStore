@@ -34,6 +34,7 @@ namespace ShoesStore.Areas.Admin.Controllers
             tkhoAdmin = _tkhoAdmin;
             mauAdmin = _mauAdmin;
         }
+
         public IActionResult SanPhamList(int madongsp)
         {
             List<Sanpham> ctSp = prDetailAdmin.GetCTSPList(madongsp);
@@ -78,44 +79,57 @@ namespace ShoesStore.Areas.Admin.Controllers
         public IActionResult AddSanPham(SanPhamViewModel pDetailView)
         {
             CreateData(pDetailView.DongsanphamId);
-            if (!ModelState.IsValid)
+            //Kiểm tra mã m
+            if (string.IsNullOrEmpty(pDetailView.IdMau))
             {
-                return View(pDetailView);
+                TempData["Error"] = "Hiện tại chưa có mã màu trong hệ thống hoặc bạn chưa chọn màu.";
+                return RedirectToAction("SanPhamList", "SanPhamAdmin", new { madongsp = pDetailView.DongsanphamId });
             }
-            string avatarImage = "";
-            string uploadFolder = Path.Combine(hostEnvironment.WebRootPath, "img", pDetailView.DongsanphamId.ToString());
 
-            // Check if the directory exists, if not, create it
+            // Không cần kiểm tra ModelState, vì view đã kiểm tra lỗi nhập liệu
+            string uploadFolder = Path.Combine(hostEnvironment.WebRootPath, "img", pDetailView.DongsanphamId.ToString());
             if (!Directory.Exists(uploadFolder))
             {
                 Directory.CreateDirectory(uploadFolder);
             }
 
-            avatarImage = Guid.NewGuid().ToString() + "_" + pDetailView.AvatarImage.FileName;
-            string filepath = Path.Combine(uploadFolder, avatarImage);
-            using (var stream = new FileStream(filepath, FileMode.Create))
+            // 🔹 Xử lý ảnh đại diện
+            string avatarImage = "default.jpg"; // giá trị mặc định nếu không chọn
+            if (pDetailView.AvatarImage != null)
             {
-                pDetailView.AvatarImage.CopyTo(stream);
-                stream.Close();
+                avatarImage = Guid.NewGuid().ToString() + "_" + pDetailView.AvatarImage.FileName;
+                string filepath = Path.Combine(uploadFolder, avatarImage);
+                using (var stream = new FileStream(filepath, FileMode.Create))
+                {
+                    pDetailView.AvatarImage.CopyTo(stream);
+                }
             }
 
-            string topImage = "";
-            topImage = Guid.NewGuid().ToString() + "_" + pDetailView.TopImage.FileName;
-            string filepathTop = Path.Combine(uploadFolder, topImage);
-            using (var stream = new FileStream(filepathTop, FileMode.Create))
+            // 🔹 Xử lý ảnh mặt trên
+            string topImage = "default.jpg";
+            if (pDetailView.TopImage != null)
             {
-                pDetailView.TopImage.CopyTo(stream);
-                stream.Close();
+                topImage = Guid.NewGuid().ToString() + "_" + pDetailView.TopImage.FileName;
+                string filepathTop = Path.Combine(uploadFolder, topImage);
+                using (var stream = new FileStream(filepathTop, FileMode.Create))
+                {
+                    pDetailView.TopImage.CopyTo(stream);
+                }
             }
 
-            string bottomImage = "";
-            bottomImage = Guid.NewGuid().ToString() + "_" + pDetailView.BottomImage.FileName;
-            string filepathBottom = Path.Combine(uploadFolder, bottomImage);
-            using (var stream = new FileStream(filepathBottom, FileMode.Create))
+            // 🔹 Xử lý ảnh đế giày
+            string bottomImage = "default.jpg";
+            if (pDetailView.BottomImage != null)
             {
-                pDetailView.BottomImage.CopyTo(stream);
-                stream.Close();
+                bottomImage = Guid.NewGuid().ToString() + "_" + pDetailView.BottomImage.FileName;
+                string filepathBottom = Path.Combine(uploadFolder, bottomImage);
+                using (var stream = new FileStream(filepathBottom, FileMode.Create))
+                {
+                    pDetailView.BottomImage.CopyTo(stream);
+                }
             }
+
+            // 🔹 Xử lý video nếu có
             string videoPath = "";
             if (pDetailView.VideoFile != null)
             {
@@ -127,6 +141,7 @@ namespace ShoesStore.Areas.Admin.Controllers
                 videoPath = ProcessUploadedFile(pDetailView.VideoFile, videosUploadFolder);
             }
 
+            // 🔹 Tạo mới đối tượng sản phẩm
             Sanpham ctSp = new Sanpham
             {
                 Madongsanpham = pDetailView.DongsanphamId,
@@ -138,20 +153,23 @@ namespace ShoesStore.Areas.Admin.Controllers
                 TrangThai = (Sanpham.TrangThaiEnum)pDetailView.TrangThai,
             };
 
+            // 🔹 Lưu DB
             prDetailAdmin.AddChitietSp(ctSp);
 
+            // 🔹 Lưu danh sách size
             List<int> IdSizeList = sizeAdmin.GetMasizeList();
-
             List<Sanphamsize> tkhos = IdSizeList.Zip(pDetailView.slton,
-                                                (idSize, SAndAmount) => new Sanphamsize
-                                                {
-                                                    Masp = ctSp.Masp,
-                                                    Masize = idSize,
-                                                    Slton = SAndAmount
-                                                }).ToList();
-            //Zip IdSizeList and sizeAndAmount by correponding 2 elemnts is id size and amount
+                (idSize, SAndAmount) => new Sanphamsize
+                {
+                    Masp = ctSp.Masp,
+                    Masize = idSize,
+                    Slton = SAndAmount
+                }).ToList();
 
             tkhoAdmin.AddListTonKho(tkhos);
+
+            // ✅ Thông báo thành công
+            TempData["Success"] = "Đã thêm sản phẩm mới thành công!";
 
             return RedirectToAction("SanPhamList", "SanPhamAdmin", new { madongsp = pDetailView.DongsanphamId });
         }
@@ -165,6 +183,7 @@ namespace ShoesStore.Areas.Admin.Controllers
             }
             return fileName;
         }
+
         public IActionResult UpdateSanPham(int masp)
         {
             Sanpham sp = prDetailAdmin.GetChitietSpById(masp);
@@ -183,7 +202,6 @@ namespace ShoesStore.Areas.Admin.Controllers
                 TrangThai = (SanPhamViewModel.TrangThaiEnum)sp.TrangThai
             };
 
-
             return View(pDetailVM);
         }
 
@@ -193,96 +211,119 @@ namespace ShoesStore.Areas.Admin.Controllers
             Sanpham sp = prDetailAdmin.GetChitietSpById(masp);
             CreateData(pDetailView.DongsanphamId, sp);
 
-            string uploadFolder = Path.Combine(hostEnvironment.WebRootPath, "img", pDetailView.DongsanphamId.ToString());
-            if (pDetailView.AvatarImage != null)
+            try
             {
-                string avatarImg = Guid.NewGuid().ToString() + "_" + pDetailView.AvatarImage.FileName;
-                string filePath = Path.Combine(uploadFolder, avatarImg);
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                string uploadFolder = Path.Combine(hostEnvironment.WebRootPath, "img", pDetailView.DongsanphamId.ToString());
+                if (pDetailView.AvatarImage != null)
                 {
-                    pDetailView.AvatarImage.CopyTo(stream);
-                    stream.Close();
+                    string avatarImg = Guid.NewGuid().ToString() + "_" + pDetailView.AvatarImage.FileName;
+                    string filePath = Path.Combine(uploadFolder, avatarImg);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        pDetailView.AvatarImage.CopyTo(stream);
+                        stream.Close();
+                    }
+                    DeleteImage(pDetailView.DongsanphamId, sp.Anhdaidien);
+                    sp.Anhdaidien = avatarImg;
                 }
-                DeleteImage(pDetailView.DongsanphamId, sp.Anhdaidien);
-                sp.Anhdaidien = avatarImg;
+                if (pDetailView.TopImage != null)
+                {
+                    string topImg = Guid.NewGuid().ToString() + "_" + pDetailView.TopImage.FileName;
+                    string filepath2 = Path.Combine(uploadFolder, topImg);
+                    using (var stream = new FileStream(filepath2, FileMode.Create))
+                    {
+                        pDetailView.TopImage.CopyTo(stream);
+                        stream.Close();
+                    }
+                    DeleteImage(pDetailView.DongsanphamId, sp.Anhmattren);
+                    sp.Anhmattren = topImg;
+                }
+                if (pDetailView.BottomImage != null)
+                {
+                    string bottomImg = Guid.NewGuid().ToString() + "_" + pDetailView.BottomImage.FileName;
+                    string filepath3 = Path.Combine(uploadFolder, bottomImg);
+                    using (var stream = new FileStream(filepath3, FileMode.Create))
+                    {
+                        pDetailView.BottomImage.CopyTo(stream);
+                        stream.Close();
+                    }
+                    DeleteImage(pDetailView.DongsanphamId, sp.Anhdegiay);
+                    sp.Anhdegiay = bottomImg;
+                }
+                if (pDetailView.VideoFile != null)
+                {
+                    string videosUploadFolder = Path.Combine(hostEnvironment.WebRootPath, "videos", pDetailView.DongsanphamId.ToString());
+                    if (!Directory.Exists(videosUploadFolder))
+                    {
+                        Directory.CreateDirectory(videosUploadFolder);
+                    }
+                    string videoPath = ProcessUploadedFile(pDetailView.VideoFile, videosUploadFolder);
+                    if (!string.IsNullOrEmpty(sp.Video))
+                    {
+                        DeleteVideo(pDetailView.DongsanphamId, sp.Video);
+                    }
+                    sp.Video = videoPath;
+                }
+
+                sp.TrangThai = (Sanpham.TrangThaiEnum)pDetailView.TrangThai;
+                prDetailAdmin.UpdateChitietSp(sp);
+
+                List<int> MaSizeList = sizeAdmin.GetMasizeList();
+                List<Sanphamsize> spSize = MaSizeList.Zip(pDetailView.slton,
+                                                        (Masize, slton) => new Sanphamsize
+                                                        {
+                                                            Masp = masp,
+                                                            Masize = Masize,
+                                                            Slton = slton,
+                                                        }).ToList();
+
+                tkhoAdmin.UpdateListSpSize(spSize);
+
+                // ✅ Thông báo khi cập nhật thành công
+                TempData["Success"] = "Đã cập nhật sản phẩm thành công!";
             }
-            if (pDetailView.TopImage != null)
+            catch (Exception ex)
             {
-
-                string topImg = Guid.NewGuid().ToString() + "_" + pDetailView.TopImage.FileName;
-
-                string filepath2 = Path.Combine(uploadFolder, topImg);
-                using (var stream = new FileStream(filepath2, FileMode.Create))
-                {
-                    pDetailView.TopImage.CopyTo(stream);
-                    stream.Close();
-                }
-
-
-                DeleteImage(pDetailView.DongsanphamId, sp.Anhmattren);
-                sp.Anhmattren = topImg;
+                TempData["Error"] = "Lỗi khi cập nhật sản phẩm: " + ex.Message;
             }
-            if (pDetailView.BottomImage != null)
-            {
-                string bottomImg = Guid.NewGuid().ToString() + "_" + pDetailView.BottomImage.FileName;
-                string filepath3 = Path.Combine(uploadFolder, bottomImg);
-                using (var stream = new FileStream(filepath3, FileMode.Create))
-                {
-                    pDetailView.BottomImage.CopyTo(stream);
-                    stream.Close();
-                }
-
-
-                DeleteImage(pDetailView.DongsanphamId, sp.Anhdegiay);
-                sp.Anhdegiay = bottomImg;
-            }
-            if (pDetailView.VideoFile != null)
-            {
-                string videosUploadFolder = Path.Combine(hostEnvironment.WebRootPath, "videos", pDetailView.DongsanphamId.ToString());
-                if (!Directory.Exists(videosUploadFolder))
-                {
-                    Directory.CreateDirectory(videosUploadFolder);
-                }
-                string videoPath = ProcessUploadedFile(pDetailView.VideoFile, videosUploadFolder);
-                if (!string.IsNullOrEmpty(sp.Video))
-                {
-                    // Nếu có, xóa video cũ
-                    DeleteVideo(pDetailView.DongsanphamId, sp.Video);
-                }
-                sp.Video = videoPath; // Cập nhật đường dẫn video mới
-            }
-            sp.TrangThai = (Sanpham.TrangThaiEnum)pDetailView.TrangThai;
-
-            prDetailAdmin.UpdateChitietSp(sp);
-
-            List<int> MaSizeList = sizeAdmin.GetMasizeList();
-            List<Sanphamsize> spSize = MaSizeList.Zip(pDetailView.slton,
-                                                    (Masize, slton) => new Sanphamsize
-                                                    {
-                                                        Masp = masp,
-                                                        Masize = Masize,
-                                                        Slton = slton,
-                                                    }).ToList();
-
-            tkhoAdmin.UpdateListSpSize(spSize);
 
             return RedirectToAction("SanPhamList", "SanPhamAdmin", new { madongsp = pDetailView.DongsanphamId });
         }
 
         public IActionResult DeleteSanPham(int masp)
         {
-            Sanpham ctSp = prDetailAdmin.GetChitietSpById(masp);
+            try
+            {
+                var ctSp = prDetailAdmin.GetChitietSpById(masp);
 
-            int madongsp = ctSp.Madongsanpham;
+                if (ctSp == null)
+                {
+                    TempData["Error"] = "Không tìm thấy sản phẩm để xóa.";
+                    return RedirectToAction("SanPhamList");
+                }
 
-            DeleteImage(madongsp, ctSp.Anhdaidien);
-            DeleteImage(madongsp, ctSp.Anhmattren);
-            DeleteVideo(madongsp, ctSp.Video);  
-            tkhoAdmin.DeleteTonKhoListByCtSp(masp);
-            prDetailAdmin.DeleteChitietSp(masp);
+                int madongsp = ctSp.Madongsanpham;
 
-            return RedirectToAction("SanPhamList", "SanPhamAdmin", new { madongsp = ctSp.Madongsanpham });
+                // ✅ Xóa file ảnh & video
+                DeleteImage(madongsp, ctSp.Anhdaidien);
+                DeleteImage(madongsp, ctSp.Anhmattren);
+                DeleteImage(madongsp, ctSp.Anhdegiay);
+                DeleteVideo(madongsp, ctSp.Video);
+
+                // ✅ Xóa sản phẩm & dữ liệu liên quan
+                prDetailAdmin.DeleteChitietSp(masp);
+
+                TempData["Success"] = "Đã xóa sản phẩm thành công!";
+                return RedirectToAction("SanPhamList", new { madongsp = madongsp });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Lỗi khi xóa sản phẩm: " + ex.Message;
+                return RedirectToAction("SanPhamList");
+            }
         }
+
+
 
         public void DeleteImage(int madongsp, string imagePath)
         {
@@ -292,8 +333,8 @@ namespace ShoesStore.Areas.Admin.Controllers
             {
                 System.IO.File.Delete(filepath);
             }
-
         }
+
         public void DeleteVideo(int madongsp, string? videoPath)
         {
             string videosFolder = Path.Combine(hostEnvironment.WebRootPath, "videos", madongsp.ToString());
@@ -317,7 +358,6 @@ namespace ShoesStore.Areas.Admin.Controllers
                 ViewBag.Masp = sp.Masp;
             }
             ViewBag.ColorChoice = new SelectList(mauList, "Mamau", "Tenmau");
-
         }
     }
 }

@@ -3,6 +3,15 @@
 @{
     ViewData["Title"] = "Update San Pham";
 }
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success text-center">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger text-center">@TempData["Error"]</div>
+}
+
 
 <h1>Edit Shoes Detail</h1>
 
