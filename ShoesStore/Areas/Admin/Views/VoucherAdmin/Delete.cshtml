@@ -1,0 +1,52 @@
+﻿@* @model Voucher
+
+@{
+    ViewData["Title"] = "Delete Voucher";
+}
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<div class="container">
+    <h2 class="text-center text-danger">Delete Voucher</h2>
+
+    <div class="alert alert-warning">
+        <h4>Are you sure you want to delete this voucher?</h4>
+        <p class="mb-0">This action cannot be undone.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-light">
+            <h5 class="card-title mb-0">Voucher Details</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Code:</strong> @Model.Mavoucher</p>
+                    <p><strong>Quantity:</strong> @Model.Soluong</p>
+                    <p><strong>Minimum Price:</strong> @Model.Giatoithieu.ToString("#,##0")đ</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Maximum Discount:</strong> @Model.Giamtoida.ToString("#,##0")đ</p>
+                    <p><strong>Created Date:</strong> @Model.Ngaytao.ToString("dd/MM/yyyy")</p>
+                    <p><strong>Expiration Date:</strong> @Model.Ngayhethan.ToString("dd/MM/yyyy")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORM XÓA -->
+    <form asp-action="Delete" method="post" class="mt-4">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Mavoucher" />
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Confirm Delete
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </form>
+</div> *@
