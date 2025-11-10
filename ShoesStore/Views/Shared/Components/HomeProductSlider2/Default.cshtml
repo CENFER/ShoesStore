@@ -2,7 +2,12 @@
 
 @model List<SanPhamHomeViewModel>
 @{
-    int state = (int)(Sanpham.TrangThaiEnum)Model.ElementAt(0).sp.TrangThai;
+
+    int state = 0;
+    if (Model != null && Model.Any() && Model.First().sp != null)
+    {
+        state = (int)Model.First().sp.TrangThai;
+    }
 }
 
 <style>

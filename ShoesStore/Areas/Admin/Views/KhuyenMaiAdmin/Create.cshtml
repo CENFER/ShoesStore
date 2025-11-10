@@ -1,46 +1,246 @@
 ﻿@model ShoesStore.Models.Khuyenmai
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create New Promotion";
 }
 
-<div class="col-12 grid-margin stretch-card">
-    <div class="card">
-        <div class="card-body">
-            <h4 class="card-title">Create New Promotion</h4>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-            <form asp-action="Create" method="post" id="createForm">
-                <div class="form-group">
-                    <label asp-for="Ngaybd">Starting date</label>  
-                    <input asp-for="Ngaybd" class="form-control" type="date" />
-                </div>
-                <div class="form-group">
-                    <label asp-for="Ngaykt">Ending date</label>
-                    <input asp-for="Ngaykt" class="form-control" type="date" />
-                </div>
-                <div class="form-group">
-                    <label asp-for="Phantramgiam">Percent sale</label>
-                    <input asp-for="Phantramgiam" class="form-control" type="number"/>
-                </div>
-                <!-- Button type="submit" đã được di chuyển ra ngoài form -->
-                <button type="submit" class="btn btn-gradient-primary me-2">Create</button>
-                <a href="@Url.Action("Index", "KhuyenMaiAdmin")" class="btn btn-light">Cancel</a>
-            </form>
+<div class="container">
+    <h2 class="text-center">Tạo Khuyến Mãi Mới</h2>
+
+    <form asp-action="Create" method="post" class="form-horizontal" id="createForm">
+        @Html.AntiForgeryToken()
+
+        <!-- NGÀY BẮT ĐẦU -->
+        <div class="form-group row mb-3">
+            <label asp-for="Ngaybd" class="col-sm-3 col-form-label">Ngày Bắt Đầu</label>
+            <div class="col-sm-9">
+                <input asp-for="Ngaybd" class="form-control" type="date" id="Ngaybd" />
+                <!-- Hiển thị lỗi từ ModelState -->
+                @if (ViewData.ModelState["Ngaybd"]?.Errors.Count > 0)
+                {
+                    <span class="text-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        @ViewData.ModelState["Ngaybd"].Errors[0].ErrorMessage
+                    </span>
+                }
+            </div>
         </div>
-    </div>
-</div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-    $(document).ready(function () {
-        $('#createForm').submit(function (e) {
-            var ngayBd = new Date($('#Ngaybd').val());
-            var ngayKt = new Date($('#Ngaykt').val());
 
-            // Kiểm tra nếu ngày kết thúc trước ngày bắt đầu
-            if (ngayKt < ngayBd) {
-                e.preventDefault(); // Ngăn không cho form submit
-                alert('The end date must be after or the same as the start date.');
-            }
+        <!-- NGÀY KẾT THÚC -->
+        <div class="form-group row mb-3">
+            <label asp-for="Ngaykt" class="col-sm-3 col-form-label">Ngày Kết Thúc</label>
+            <div class="col-sm-9">
+                <input asp-for="Ngaykt" class="form-control" type="date" id="Ngaykt" />
+                <!-- Hiển thị lỗi required từ ModelState -->
+                @if (ViewData.ModelState["Ngaykt"]?.Errors.Count > 0)
+                {
+                    <span class="text-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        @ViewData.ModelState["Ngaykt"].Errors[0].ErrorMessage
+                    </span>
+                }
+                <!-- Hiển thị lỗi custom cho logic ngày -->
+                <span id="dateError" class="text-danger" style="display: none;">
+                    <i class="fas fa-exclamation-circle"></i> Ngày kết thúc phải lớn hơn ngày bắt đầu
+                </span>
+            </div>
+        </div>
+
+        <!-- PHẦN TRĂM GIẢM -->
+        <div class="form-group row mb-3">
+            <label asp-for="Phantramgiam" class="col-sm-3 col-form-label">Phần Trăm Giảm (%)</label>
+            <div class="col-sm-9">
+                <input asp-for="Phantramgiam" class="form-control" type="number" id="Phantramgiam"
+                       placeholder="Nhập từ 1 đến 100"
+                       oninput="validatePercentage(this)" />
+                <!-- Hiển thị lỗi từ ModelState -->
+                @if (ViewData.ModelState["Phantramgiam"]?.Errors.Count > 0)
+                {
+                    <span class="text-danger" id="serverPercentageError">
+                        <i class="fas fa-exclamation-circle"></i>
+                        @ViewData.ModelState["Phantramgiam"].Errors[0].ErrorMessage
+                    </span>
+                }
+                <!-- Hiển thị lỗi real-time -->
+                <span id="percentageError" class="text-danger" style="display: none;">
+                    <i class="fas fa-exclamation-circle"></i> Phần trăm giảm phải từ 1% đến 100%
+                </span>
+                <!-- Hiển thị lỗi required real-time -->
+                <span id="percentageRequiredError" class="text-danger" style="display: none;">
+                    <i class="fas fa-exclamation-circle"></i> Phần trăm giảm là bắt buộc
+                </span>
+            </div>
+        </div>
+
+        <!-- HIỂN THỊ LỖI TỔNG QUÁT -->
+        @if (ViewData.ModelState[""]?.Errors.Count > 0)
+        {
+            <div class="alert alert-danger">
+                @foreach (var error in ViewData.ModelState[""].Errors)
+                {
+                    <div><i class="fas fa-exclamation-circle"></i> @error.ErrorMessage</div>
+                }
+            </div>
+        }
+
+        <!-- NÚT SUBMIT -->
+        <div class="form-group row">
+            <div class="col-sm-9 offset-sm-3">
+                <button type="submit" class="btn btn-success" id="submitBtn">
+                    <i class="fas fa-check"></i> Tạo Khuyến Mãi
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('createForm');
+            form.setAttribute('novalidate', 'novalidate');
+
+            // Xử lý sự kiện submit form
+            form.addEventListener('submit', function(e) {
+                if (!validateForm()) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // Real-time validation
+            setupRealTimeValidation();
+
+            // Kiểm tra giá trị ban đầu nếu có lỗi từ server
+            checkInitialErrors();
         });
-    });
-</script>
+
+        function setupRealTimeValidation() {
+            const ngayBdInput = document.getElementById('Ngaybd');
+            const ngayKtInput = document.getElementById('Ngaykt');
+            const phanTramInput = document.getElementById('Phantramgiam');
+
+            // Real-time validation cho phần trăm
+            phanTramInput.addEventListener('input', function() {
+                validatePercentage(this);
+            });
+
+            // Real-time validation cho ngày
+            ngayBdInput.addEventListener('change', validateDates);
+            ngayKtInput.addEventListener('change', validateDates);
+        }
+
+        function checkInitialErrors() {
+            const phanTramInput = document.getElementById('Phantramgiam');
+            // Nếu có giá trị và giá trị không hợp lệ, hiển thị lỗi
+            if (phanTramInput.value) {
+                validatePercentage(phanTramInput);
+            }
+
+            // Kiểm tra lỗi ngày từ server
+            const ngayBdInput = document.getElementById('Ngaybd');
+            const ngayKtInput = document.getElementById('Ngaykt');
+            if (ngayBdInput.value && ngayKtInput.value) {
+                validateDates();
+            }
+        }
+
+        function validatePercentage(input) {
+            const value = input.value.trim();
+            const numValue = parseInt(value) || 0;
+            const percentageError = document.getElementById('percentageError');
+            const percentageRequiredError = document.getElementById('percentageRequiredError');
+            const serverError = document.getElementById('serverPercentageError');
+
+            console.log('Validating percentage:', value, 'numValue:', numValue); // Debug
+
+            // Ẩn tất cả lỗi trước
+            percentageError.style.display = 'none';
+            percentageRequiredError.style.display = 'none';
+            if (serverError) {
+                serverError.style.display = 'none';
+            }
+
+            if (value === '') {
+                // Không nhập gì
+                console.log('Case 1: Empty input');
+                input.classList.add('is-invalid');
+                percentageRequiredError.style.display = 'block';
+                return false;
+            } else if (numValue === 0 || numValue < 1 || numValue > 100) {
+                // Nhập số nhưng không hợp lệ (0, âm, >100)
+                console.log('Case 2: Invalid number', numValue);
+                input.classList.add('is-invalid');
+                percentageError.style.display = 'block';
+                return false;
+            } else {
+                // Hợp lệ
+                console.log('Case 3: Valid number', numValue);
+                input.classList.remove('is-invalid');
+                return true;
+            }
+        }
+
+        function validateDates() {
+            const ngayBdInput = document.getElementById('Ngaybd');
+            const ngayKtInput = document.getElementById('Ngaykt');
+            const dateErrorSpan = document.getElementById('dateError');
+
+            const ngayBd = new Date(ngayBdInput.value);
+            const ngayKt = new Date(ngayKtInput.value);
+
+            if (ngayBdInput.value && ngayKtInput.value && ngayKt <= ngayBd) {
+                ngayKtInput.classList.add('is-invalid');
+                dateErrorSpan.style.display = 'block';
+                return false;
+            } else {
+                ngayKtInput.classList.remove('is-invalid');
+                dateErrorSpan.style.display = 'none';
+                return true;
+            }
+        }
+
+        function validateForm() {
+            let isValid = true;
+
+            const ngayBdInput = document.getElementById('Ngaybd');
+            const ngayKtInput = document.getElementById('Ngaykt');
+            const phanTramInput = document.getElementById('Phantramgiam');
+
+            // Validate required fields
+            if (!ngayBdInput.value || ngayBdInput.value === '0001-01-01') {
+                ngayBdInput.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                ngayBdInput.classList.remove('is-invalid');
+            }
+
+            if (!ngayKtInput.value || ngayKtInput.value === '0001-01-01') {
+                ngayKtInput.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                ngayKtInput.classList.remove('is-invalid');
+            }
+
+            // Validate phần trăm
+            if (!validatePercentage(phanTramInput)) {
+                isValid = false;
+            }
+
+            // Validate ngày - chỉ kiểm tra nếu có giá trị hợp lệ
+            if (ngayBdInput.value && ngayBdInput.value !== '0001-01-01' &&
+                ngayKtInput.value && ngayKtInput.value !== '0001-01-01' &&
+                !validateDates()) {
+                isValid = false;
+            }
+
+            return isValid;
+        }
+    </script>
+}

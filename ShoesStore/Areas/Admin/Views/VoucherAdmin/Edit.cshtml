@@ -11,11 +11,15 @@
 <div class="container">
     <h2 class="text-center">Edit Voucher</h2>
 
-    <form asp-action="Edit" method="post" class="form-horizontal">
+    <!-- THÊM asp-route-id VÀ @Html.AntiForgeryToken() -->
+    <form asp-action="Edit" asp-route-id="@Model.Mavoucher" method="post" class="form-horizontal">
+        @Html.AntiForgeryToken()
+
         <div class="form-group row">
             <label asp-for="Mavoucher" class="col-sm-2 col-form-label">Code</label>
             <div class="col-sm-10">
-                <input asp-for="Mavoucher" class="form-control" />
+                <!-- THÊM readonly VÀ hidden field -->
+                <input asp-for="Mavoucher" class="form-control" readonly />
                 <span asp-validation-for="Mavoucher" class="text-danger"></span>
             </div>
         </div>
@@ -66,3 +70,9 @@
         </div>
     </form>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

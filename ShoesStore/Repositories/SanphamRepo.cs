@@ -58,44 +58,46 @@ namespace ShoesStore.Repositories
 		{
 			DateTime today = DateTime.Now.Date;
 			List<Khuyenmai> allkmToday = _context.Khuyenmais.Include(x => x.Madongsanphams)
-											.ThenInclude(d => d.Sanphams).Where(x => x.Ngaybd >= today && x.Ngaykt <= today)
+											.ThenInclude(d => d.Sanphams).Where(x => x.Ngaybd <= today && today <= x.Ngaykt)
 											.ToList();
 			List<Sanpham> sp = _context.Sanphams.Where(x => x.TrangThai == (Sanpham.TrangThaiEnum)trangthai)
 											.Include(x => x.MadongsanphamNavigation)
 											.Include(x => x.MamauNavigation).ToList();
 			List<SanPhamHomeViewModel> spViewHome = new List<SanPhamHomeViewModel>();
 
-			foreach (var sanpham in sp)
-			{
+            foreach (var sanpham in sp)
+            {
+                bool isInSale = false;
 
-				bool check = true;
-				foreach (Khuyenmai km in allkmToday)
-				{
-					if (km.Madongsanphams.FirstOrDefault(x => x.Sanphams.Contains(sanpham)) != null)
-					{
-						check = false;
-						break;
-					}
-				}
-				if (check)
-				{
-					spViewHome.Add(new SanPhamHomeViewModel
-					{
-						sp = sanpham,
-						phantramgiam = 0
-					});
-				}
-				//Only add product has hot and new without sale, because when it sale that is in slider sale
+                // Kiểm tra sản phẩm có nằm trong khuyến mãi hôm nay không
+                foreach (var km in allkmToday)
+                {
+                    if (km.Madongsanphams.Any(x => x.Sanphams.Contains(sanpham)))
+                    {
+                        isInSale = true;
+                        break;
+                    }
+                }
 
+                // ✅ Chỉ thêm sản phẩm không nằm trong khuyến mãi (vì sale hiển thị ở slider)
+                if (!isInSale)
+                {
+                    spViewHome.Add(new SanPhamHomeViewModel
+                    {
+                        sp = sanpham,
+                        phantramgiam = 0
+                    });
+                }
+            }
 
+            // ✅ Tránh trả về null hoặc rỗng, để View không bị lỗi
+            if (spViewHome == null)
+                spViewHome = new List<SanPhamHomeViewModel>();
 
-			}
+            return spViewHome;
+        }
 
-			return spViewHome;
-
-		}
-
-		public FavouriteProductsItem GetFavProById(int id)
+        public FavouriteProductsItem GetFavProById(int id)
 		{
 			Sanpham sp = _context.Sanphams.FirstOrDefault(x => x.Masp == id);
 			Dongsanpham dsp = _context.Dongsanphams.FirstOrDefault(x => x.Madongsanpham == sp.Madongsanpham);

@@ -34,7 +34,7 @@
     }
     @RenderSection("Scripts",required:false)
 </style>
-    <script src="https://cdn.tiny.cloud/1/3b53otxytoljoo9x8np847gnu52qz30hysoofll45s6t71rr/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="https://cdn.tiny.cloud/1/tl5ge94hbbyh4u5b7augvchik3jsrqz7q3zq6dg7u76htg4o/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tinymce.init({
@@ -48,6 +48,74 @@
                 'bullist numlist checklist outdent indent | removeformat | code table help'
         });
     </script>
+
+    <style>
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .popup-content {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            min-width: 300px;
+            transform: scale(0.7);
+            opacity: 0;
+            transition: all 0.3s ease;
+            border: 3px solid #28a745;
+        }
+
+            .popup-content.show {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            .popup-content.error {
+                border-color: #dc3545;
+            }
+
+        .popup-icon {
+            font-size: 48px;
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+
+        .popup-content.error .popup-icon {
+            color: #dc3545;
+        }
+
+        .popup-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .btn-popup {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .popup-content.error .btn-popup {
+            background: #dc3545;
+        }
+    </style>
 </head>
 <body>
    
@@ -238,5 +306,95 @@
     <!-- endinject -->
     <!-- Custom js for this page -->
     <!-- End custom js for this page -->
+
+    <!-- Popup Notification -->
+    <div class="popup-overlay" id="notificationPopup" style="display: none;">
+        <div class="popup-content" id="popupContent">
+            <div class="popup-icon" id="popupIcon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="popup-text" id="popupText">Thông báo</div>
+            <button class="btn-popup" onclick="hideNotification()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // Hiển thị thông báo
+        function showNotification(message, isSuccess = true) {
+            const popup = document.getElementById('notificationPopup');
+            const popupContent = document.getElementById('popupContent');
+            const popupIcon = document.getElementById('popupIcon');
+            const popupText = document.getElementById('popupText');
+
+            // Giải mã HTML entities (sửa lỗi ký tự)
+            const decodedMessage = decodeHtmlEntities(message);
+            popupText.textContent = decodedMessage;
+
+            if (isSuccess) {
+                popupContent.className = 'popup-content';
+                popupIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+            } else {
+                popupContent.className = 'popup-content error';
+                popupIcon.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
+            }
+
+            // Hiển thị popup
+            popup.style.display = 'flex';
+
+            // Animation
+            setTimeout(() => {
+                popupContent.classList.add('show');
+            }, 50);
+        }
+
+        // Ẩn thông báo
+        function hideNotification() {
+            const popup = document.getElementById('notificationPopup');
+            const popupContent = document.getElementById('popupContent');
+
+            popupContent.classList.remove('show');
+
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 300);
+        }
+
+        // Giải mã HTML entities
+        function decodeHtmlEntities(text) {
+            const textArea = document.createElement('textarea');
+            textArea.innerHTML = text;
+            return textArea.value;
+        }
+
+        // Tự động hiển thị thông báo khi trang load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Kiểm tra TempData từ server
+            const successMessage = '@Html.Raw(TempData["Success"])';
+            const errorMessage = '@Html.Raw(TempData["Error"])';
+
+            console.log('Admin Success Message:', successMessage);
+            console.log('Admin Error Message:', errorMessage);
+
+            if (successMessage && successMessage !== '') {
+                showNotification(successMessage, true);
+            } else if (errorMessage && errorMessage !== '') {
+                showNotification(errorMessage, false);
+            }
+
+            // Click outside to close
+            document.getElementById('notificationPopup').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideNotification();
+                }
+            });
+
+            // ESC key to close
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    hideNotification();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
