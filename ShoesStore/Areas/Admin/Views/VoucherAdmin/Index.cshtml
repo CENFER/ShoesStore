@@ -53,15 +53,33 @@
                     <td>@Model[i].Ngaytao.ToString("dd/MM/yyyy")</td>
                     <td>@Model[i].Ngayhethan.ToString("dd/MM/yyyy")</td>
                     <td>
-                        <a asp-action="Edit" asp-controller="VoucherAdmin" asp-route-id="@Model[i].Mavoucher" class="btn btn-primary">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <form asp-controller="VoucherAdmin" asp-action="Delete" asp-route-id="@Model[i].Mavoucher" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-danger">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </form>
+                        <div class="d-flex justify-content-center gap-2">
+                            <a asp-action="Edit"
+                               asp-controller="VoucherAdmin"
+                               asp-route-id="@Model[i].Mavoucher"
+                               class="btn btn-gradient-primary d-flex align-items-center justify-content-center"
+                               style="width:40px; height:40px;"
+                               title="Edit"
+                               aria-label="Edit voucher @Model[i].Mavoucher">
+                                <i class="mdi mdi-table-edit"></i>
+                            </a>
 
+                            <form asp-controller="VoucherAdmin"
+                                  asp-action="Delete"
+                                  asp-route-id="@Model[i].Mavoucher"
+                                  method="post"
+                                  class="d-inline"
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa voucher này không?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit"
+                                        class="btn btn-gradient-danger d-flex align-items-center justify-content-center"
+                                        style="width:40px; height:40px;"
+                                        title="Delete"
+                                        aria-label="Delete voucher @Model[i].Mavoucher">
+                                    <i class="mdi mdi-delete"></i>
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             }

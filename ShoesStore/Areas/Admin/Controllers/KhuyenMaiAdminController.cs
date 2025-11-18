@@ -91,7 +91,6 @@ namespace ShoesStore.Areas.Admin.Controllers
             // NẾU CÓ LỖI VALIDATION, TRẢ VỀ VIEW VỚI MODEL VÀ LỖI
             return View(km);
         }
-
         // ACTION DELETE CHO GET REQUEST
         public IActionResult Delete(int id)
         {

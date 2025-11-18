@@ -44,16 +44,23 @@
                     <td>@item.Ngaybd</td>
                     <td>@item.Ngaykt</td>
                     <td>
+                        <div class="d-flex justify-content-center gap-2">
                         <a asp-action="ListDongSanPham" asp-controller="KhuyenMaiAdmin" asp-route-makm="@item.Makm" class="btn btn-gradient-info">
                             <i class="mdi mdi-information"></i>
                         </a>
 
-                        <form asp-controller="KhuyenMaiAdmin" asp-action="Delete" asp-route-id="@item.Makm" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-gradient-danger">
-                                <i class="mdi mdi-delete"></i>
-                            </button>
-                        </form>
+                        <a asp-action="Delete"
+                           asp-controller="KhuyenMaiAdmin"
+                           asp-route-id="@item.Makm"
+                           class="btn btn-gradient-danger d-flex align-items-center justify-content-center ms-1"
+                           style="width:40px; height:40px;"
+                           onclick="return confirm('Bạn có chắc chắn muốn xóa khuyến mãi này không?');"
+                           title="Delete">
+                            <i class="mdi mdi-delete"></i>
+                        </a>
+                        </div>
                     </td>
+                   
 
                 </tr>
             }
