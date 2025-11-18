@@ -3,6 +3,20 @@
 @{
     ViewData["title"] = "Type page";
 }
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+        <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+        <button class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+        <i class="fas fa-times-circle me-2"></i>@TempData["Error"]
+        <button class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
 
@@ -43,16 +57,28 @@
             {
                 <tr>
                     <td>@item.Maloai</td>
-                    <td>@item.Tenloai</td>        
-                    <td>
-                        <a asp-action="Edit" asp-controller="Loai" asp-route-id="@item.Maloai" class="btn btn-gradient-primary">
-                            <i class="mdi mdi-table-edit"></i>
-                        </a>
-                        <form asp-controller="Loai" asp-action="Delete" asp-route-id="@item.Maloai" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-gradient-danger">
+                    <td>@item.Tenloai</td>
+                    <td class="text-center align-middle">
+                        <div class="d-flex justify-content-center gap-2">
+                            <a asp-action="Edit"
+                               asp-controller="Loai"
+                               asp-route-id="@item.Maloai"
+                               class="btn btn-gradient-primary d-flex align-items-center justify-content-center"
+                               style="width:40px; height:40px;"
+                               title="Edit">
+                                <i class="mdi mdi-table-edit"></i>
+                            </a>
+
+                            <a asp-action="Delete"
+                               asp-controller="Loai"
+                               asp-route-id="@item.Maloai"
+                               class="btn btn-gradient-danger d-flex align-items-center justify-content-center"
+                               style="width:40px; height:40px;"
+                               onclick="return confirm('Bạn có chắc chắn muốn xóa loại giày này không?');"
+                               title="Delete">
                                 <i class="mdi mdi-delete"></i>
-                            </button>
-                        </form>
+                            </a>
+                        </div>
                     </td>
 
                 </tr>

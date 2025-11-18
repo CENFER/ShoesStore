@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ShoesStore.Areas.Admin.InterfaceRepositories;
 using ShoesStore.Areas.Admin.ViewModels;
-using ShoesStore.InterfaceRepositories;
 using ShoesStore.Models;
 using ShoesStore.Models.Authentication;
 using System.Security.Claims;
@@ -21,6 +19,7 @@ namespace ShoesStore.Areas.Admin.Controllers
             _pmrepo = pmrepo;
             _db = db;
         }
+
         public IActionResult Index()
         {
             return View(_pmrepo.GetAllPhieuMua().ToList());
@@ -30,9 +29,7 @@ namespace ShoesStore.Areas.Admin.Controllers
         {
             Phieumua phieuMua = _pmrepo.GetPhieuMuaById(id);
 
-
             var currentUserEmail = HttpContext.User.FindFirst(ClaimTypes.Email)?.Value;
-
             var currentEmployee = _db.Nhanviens.FirstOrDefault(e => e.Email == currentUserEmail);
 
             if (currentEmployee != null)
@@ -41,33 +38,40 @@ namespace ShoesStore.Areas.Admin.Controllers
             }
 
             var chitietphieumua = _db.Chitietphieumuas.Where(ct => ct.Mapm == id)
-                                        .Include(x => x.MaspsizeNavigation)
-                                        .ThenInclude(x => x.MasizeNavigation)
-                                        .Include(x => x.MaspsizeNavigation)
-                                        .ThenInclude(x => x.MaspNavigation)
-                                        .ThenInclude(x => x.MadongsanphamNavigation)
-                                        .Include(x => x.MaspsizeNavigation)
-                                        .ThenInclude(x => x.MaspNavigation)
-                                        .ThenInclude(x => x.MamauNavigation).ToList();
+                .Include(x => x.MaspsizeNavigation)
+                .ThenInclude(x => x.MasizeNavigation)
+                .Include(x => x.MaspsizeNavigation)
+                .ThenInclude(x => x.MaspNavigation)
+                .ThenInclude(x => x.MadongsanphamNavigation)
+                .Include(x => x.MaspsizeNavigation)
+                .ThenInclude(x => x.MaspNavigation)
+                .ThenInclude(x => x.MamauNavigation)
+                .ToList();
 
             var ctpm = new PhieuMuaDetailViewModel
             {
                 Phieumua = phieuMua,
                 Chitietphieumuas = chitietphieumua
-
             };
-            return View(ctpm); // Trả về view edit với dữ liệu phiếu mua
+
+            return View(ctpm);
         }
 
-        // POST: /Admin/PhieuMuaAdmin/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, Phieumua phieuMua,string oldState)
+        public IActionResult Edit(int id, Phieumua phieuMua, string oldState)
         {
+            try
+            {
+                _pmrepo.UpdatePhieuMua(phieuMua, id, oldState);
+                TempData["Success"] = "Cập nhật phiếu mua thành công.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Lỗi khi cập nhật phiếu mua: " + ex.Message;
+            }
 
-            _pmrepo.UpdatePhieuMua(phieuMua, id,oldState);
             return RedirectToAction(nameof(Index));
-
         }
     }
 }

@@ -97,8 +97,7 @@ namespace ShoesStore.Areas.Admin.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
-
-        [ValidateAntiForgeryToken]
+        [HttpGet]
         public IActionResult Delete(int id)
         {
             try

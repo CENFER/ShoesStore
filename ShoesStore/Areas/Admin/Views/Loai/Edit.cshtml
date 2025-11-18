@@ -3,6 +3,10 @@
 @{
     ViewData["Title"] = "Edit";
 }
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger text-center">@TempData["Error"]</div>
+}
 
 @using (Html.BeginForm("Edit", "Loai", FormMethod.Post, new { }))
 {
