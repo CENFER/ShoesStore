@@ -15,18 +15,6 @@ namespace ShoesStore.Repositories
 
         public int AddPhieuMua(PhieuMuaViewModel phieuMua)
         {
-            //decimal tongtien = 0;
-            //foreach (ShoppingCartItem cartItem in phieuMua.listcartItem)
-            //{
-            //    if(cartItem.PhanTramGiam > 1)
-            //    {
-            //        tongtien += cartItem.Quantity * (cartItem.GiaGoc - cartItem.GiaGoc * cartItem.PhanTramGiam / 100);
-            //    }
-            //    else
-            //    {
-            //        tongtien += cartItem.Quantity * cartItem.GiaGoc;
-            //    }
-            //}
             string tentinh = context.Tinhs.FirstOrDefault(x => x.Matinh == phieuMua.maTinh).Tentinh;
             string tenquan = context.Quans.FirstOrDefault(x => x.Maquan == phieuMua.maQuan).Tenquan; 
             string tenphuong = context.Phuongs.FirstOrDefault(x => x.Maphuong == phieuMua.maPhuong).Tenphuong;

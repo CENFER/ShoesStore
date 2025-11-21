@@ -36,9 +36,6 @@ namespace ShoesStore.Areas.Admin.Repositories
                 MaloaiNavigation = _context.Loais
                 .FirstOrDefault(x => x.Maloai == dongsanpham.Maloai)
                 ?? new Loai { Tenloai = "Không xác định" }
-                //Lỗi NULL khi lấy danh sách sản phẩm
-                // Sanphams = _context.Sanphams.Where(x=>x.Madongsanpham == dongsanpham.Madongsanpham).ToList(),
-                // MaloaiNavigation = _context.Loais.FirstOrDefault(x=>x.Maloai==dongsanpham.Maloai)
             }).OrderByDescending(x=>x.Madongsanpham);
 
             return dsp;

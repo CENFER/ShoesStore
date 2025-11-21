@@ -75,24 +75,6 @@ namespace ShoesStore.Repositories
 			return kmList;
 		}
 
-
-		//public Khuyenmai GetKmByPercent(int percent)
-		//{
-		//	DateTime today = DateTime.Now.Date;
-
-		//	Khuyenmai km2 = context.Khuyenmais.Include(k => k.Madongsanphams)// Include Dongsanpham entities related to Khuyenmai
-		//		.ThenInclude(d => d.Makms) // Include Khuyenmai entities related to Dongsanpham
-		//		.FirstOrDefault(x => x.Ngaybd <= today && today < x.Ngaykt && x.Phantramgiam == percent);
-			
-		//	for(int i=0;i<km2.Madongsanphams.Count();++i)
-		//	{
-		//		int madong = km2.Madongsanphams.ElementAt(i).Madongsanpham;
-		//		km2.Madongsanphams.ElementAt(i).Sanphams = context.Sanphams.Where(x=>x.Madongsanpham== madong).ToList();
-		//	}
-		//	Debug.WriteLine("Dong sp: ", km2.Madongsanphams);
-		//	return km2;
-		//}
-
 		public int GetKmProductToday(Dongsanpham dsp)
 		{
 			DateTime today = DateTime.Now.Date;
