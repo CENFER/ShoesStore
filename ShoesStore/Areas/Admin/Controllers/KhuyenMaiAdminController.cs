@@ -39,72 +39,68 @@ namespace ShoesStore.Areas.Admin.Controllers
 
             bool hasError = false;
 
-            // KIỂM TRA REQUIRED FIELDS - chỉ kiểm tra nếu là default value hoặc min value
-            bool isNgayBdValid = km.Ngaybd != default(DateTime) && km.Ngaybd.Year > 1900; // Loại bỏ năm 0001
-            bool isNgayKtValid = km.Ngaykt != default(DateTime) && km.Ngaykt.Year > 1900; // Loại bỏ năm 0001
+            // KIỂM TRA REQUIRED FIELDS
+            bool isNgayBdValid = km.Ngaybd != default(DateTime) && km.Ngaybd.Year > 1900;
+            bool isNgayKtValid = km.Ngaykt != default(DateTime) && km.Ngaykt.Year > 1900;
 
             if (!isNgayBdValid)
             {
-                ModelState.AddModelError("Ngaybd", "Ngày bắt đầu là bắt buộc");
+                ModelState.AddModelError("Ngaybd", "Start date is required.");
                 hasError = true;
             }
 
             if (!isNgayKtValid)
             {
-                ModelState.AddModelError("Ngaykt", "Ngày kết thúc là bắt buộc");
+                ModelState.AddModelError("Ngaykt", "End date is required.");
                 hasError = true;
             }
 
             // KIỂM TRA PHẦN TRĂM GIẢM
-            // Debug để xem giá trị thực tế
-            Console.WriteLine($"Phantramgiam value: {km.Phantramgiam}, Type: {km.Phantramgiam.GetType()}");
-
             if (km.Phantramgiam < 1 || km.Phantramgiam > 100)
             {
-                // Đây là trường hợp nhập số nhưng không hợp lệ (bao gồm cả số 0)
-                ModelState.AddModelError("Phantramgiam", "Phần trăm giảm phải từ 1% đến 100%");
+                ModelState.AddModelError("Phantramgiam", "Discount percentage must be between 1% and 100%.");
                 hasError = true;
             }
 
-            // KIỂM TRA NGÀY (chỉ kiểm tra nếu cả 2 đều có giá trị hợp lệ)
+            // KIỂM TRA NGÀY
             if (isNgayBdValid && isNgayKtValid && km.Ngaybd >= km.Ngaykt)
             {
-                ModelState.AddModelError("Ngaykt", "Ngày kết thúc phải lớn hơn ngày bắt đầu");
+                ModelState.AddModelError("Ngaykt", "End date must be later than start date.");
                 hasError = true;
             }
 
-            // CHỈ THỰC HIỆN KHI KHÔNG CÓ LỖI
             if (!hasError)
             {
                 try
                 {
                     _kmrepo.AddKhuyenmai(km);
-                    TempData["Success"] = "Đã thêm khuyến mãi thành công!";
+                    TempData["Success"] = "Promotion added successfully!";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "Lỗi: " + ex.Message);
+                    ModelState.AddModelError("", "Error: " + ex.Message);
                 }
             }
 
-            // NẾU CÓ LỖI VALIDATION, TRẢ VỀ VIEW VỚI MODEL VÀ LỖI
             return View(km);
         }
+
         // ACTION DELETE CHO GET REQUEST
         public IActionResult Delete(int id)
         {
             try
             {
                 _kmrepo.DeleteKhuyenmai(id);
-                TempData["Success"] = "Đã xóa khuyến mãi thành công!";
+                TempData["Success"] = "Promotion deleted successfully!";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi xóa khuyến mãi: " + ex.Message;
+                TempData["Error"] = "Error deleting promotion: " + ex.Message;
             }
             return RedirectToAction(nameof(Index));
         }
+
         public IActionResult AddDongSanPham(int makm)
         {
             var khuyenmai = _context.Khuyenmais
@@ -113,7 +109,7 @@ namespace ShoesStore.Areas.Admin.Controllers
 
             if (khuyenmai == null)
             {
-                TempData["Error"] = "Khuyến mãi không tồn tại!";
+                TempData["Error"] = "Promotion does not exist!";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -147,7 +143,7 @@ namespace ShoesStore.Areas.Admin.Controllers
 
             if (khuyenmai == null)
             {
-                TempData["Error"] = "Khuyến mãi không tồn tại!";
+                TempData["Error"] = "Promotion does not exist!";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -166,11 +162,11 @@ namespace ShoesStore.Areas.Admin.Controllers
                 }
 
                 _context.SaveChanges();
-                TempData["Success"] = "Đã thêm dòng sản phẩm vào khuyến mãi thành công!";
+                TempData["Success"] = "Product lines added to promotion successfully!";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi thêm dòng sản phẩm: " + ex.Message;
+                TempData["Error"] = "Error adding product lines: " + ex.Message;
             }
 
             return RedirectToAction("ListDongSanPham", new { makm = model.Makm });
@@ -185,7 +181,7 @@ namespace ShoesStore.Areas.Admin.Controllers
 
             if (khuyenmai == null)
             {
-                TempData["Error"] = "Khuyến mãi không tồn tại!";
+                TempData["Error"] = "Promotion does not exist!";
                 return RedirectToAction(nameof(Index));
             }
 

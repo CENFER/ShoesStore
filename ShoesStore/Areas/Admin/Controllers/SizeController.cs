@@ -17,7 +17,7 @@ namespace ShoesStore.Areas.Admin.Controllers
 
         public IActionResult Index()
         {
-            var sizes = _repo.GetAllSizes().ToList(); // ✅ ép sang List
+            var sizes = _repo.GetAllSizes().ToList(); // ✅ cast to List
             return View(sizes);
         }
 
@@ -34,22 +34,22 @@ namespace ShoesStore.Areas.Admin.Controllers
 
             try
             {
-                // ✅ Kiểm tra trùng tên size (không phân biệt hoa thường)
+                // ✅ Check duplicate size name (case-insensitive)
                 var existingSize = _repo.GetAllSizes()
                     .FirstOrDefault(s => s.Tensize.Trim().ToLower() == size.Tensize.Trim().ToLower());
 
                 if (existingSize != null)
                 {
-                    TempData["Error"] = $"Kích cỡ '{size.Tensize}' đã tồn tại trong hệ thống!";
+                    TempData["Error"] = $"Size '{size.Tensize}' already exists in the system!";
                     return RedirectToAction("Index");
                 }
 
                 _repo.AddSizes(size);
-                TempData["Success"] = "Đã thêm kích cỡ mới thành công!";
+                TempData["Success"] = "New size added successfully!";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi thêm kích cỡ: " + ex.Message;
+                TempData["Error"] = "Error adding size: " + ex.Message;
             }
 
             return RedirectToAction("Index");
@@ -60,7 +60,7 @@ namespace ShoesStore.Areas.Admin.Controllers
             var size = _repo.GetSizesById(id);
             if (size == null)
             {
-                TempData["Error"] = "Không tìm thấy kích cỡ để sửa.";
+                TempData["Error"] = "Size not found for editing.";
                 return RedirectToAction("Index");
             }
 
@@ -75,7 +75,7 @@ namespace ShoesStore.Areas.Admin.Controllers
 
             try
             {
-                // ✅ Kiểm tra trùng tên (loại trừ chính size đang sửa)
+                // ✅ Check duplicate name (exclude the size being edited)
                 var existingSize = _repo.GetAllSizes()
                     .FirstOrDefault(s =>
                         s.Tensize.Trim().ToLower() == size.Tensize.Trim().ToLower() &&
@@ -83,16 +83,16 @@ namespace ShoesStore.Areas.Admin.Controllers
 
                 if (existingSize != null)
                 {
-                    TempData["Error"] = $"Tên kích cỡ '{size.Tensize}' đã tồn tại!";
+                    TempData["Error"] = $"Size name '{size.Tensize}' already exists!";
                     return RedirectToAction("Index");
                 }
 
                 _repo.UpdateSizes(size, id);
-                TempData["Success"] = "Đã cập nhật kích cỡ thành công!";
+                TempData["Success"] = "Size updated successfully!";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi cập nhật kích cỡ: " + ex.Message;
+                TempData["Error"] = "Error updating size: " + ex.Message;
             }
 
             return RedirectToAction("Index");
@@ -103,11 +103,11 @@ namespace ShoesStore.Areas.Admin.Controllers
             try
             {
                 _repo.DeleteSizes(id);
-                TempData["Success"] = "Đã xóa kích cỡ thành công!";
+                TempData["Success"] = "Size deleted successfully!";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi xóa kích cỡ: " + ex.Message;
+                TempData["Error"] = "Error deleting size: " + ex.Message;
             }
 
             return RedirectToAction("Index");

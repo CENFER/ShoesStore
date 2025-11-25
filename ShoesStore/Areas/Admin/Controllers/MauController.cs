@@ -32,7 +32,7 @@ namespace ShoesStore.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                TempData["Error"] = "Dữ liệu không hợp lệ.";
+                TempData["Error"] = "Invalid data.";
                 return View(mau);
             }
 
@@ -40,18 +40,18 @@ namespace ShoesStore.Areas.Admin.Controllers
             var allIds = _repo.GetAllIdMau();
             if (allIds.Contains(mau.Mamau))
             {
-                TempData["Error"] = "Đã tồn tại mã màu này trong hệ thống.";
+                TempData["Error"] = "This color code already exists in the system.";
                 return RedirectToAction("Index");
             }
 
             try
             {
                 _repo.AddColors(mau);
-                TempData["Success"] = "Thêm màu mới thành công!";
+                TempData["Success"] = "New color added successfully!";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi thêm màu: " + ex.Message;
+                TempData["Error"] = "Error adding color: " + ex.Message;
             }
 
             return RedirectToAction("Index");
@@ -62,7 +62,7 @@ namespace ShoesStore.Areas.Admin.Controllers
             Mau mau = _repo.GetColorsById(Id);
             if (mau == null)
             {
-                TempData["Error"] = "Không tìm thấy màu cần sửa.";
+                TempData["Error"] = "Color to edit not found.";
                 return RedirectToAction("Index");
             }
             return View(mau);
@@ -73,18 +73,18 @@ namespace ShoesStore.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                TempData["Error"] = "Dữ liệu không hợp lệ.";
+                TempData["Error"] = "Invalid data.";
                 return View(mau);
             }
 
             try
             {
                 _repo.UpdateColors(mau, Id);
-                TempData["Success"] = "Cập nhật màu thành công!";
+                TempData["Success"] = "Color updated successfully!";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi cập nhật màu: " + ex.Message;
+                TempData["Error"] = "Error updating color: " + ex.Message;
             }
 
             return RedirectToAction("Index");
@@ -95,11 +95,11 @@ namespace ShoesStore.Areas.Admin.Controllers
             try
             {
                 _repo.DeleteColors(id);
-                TempData["Success"] = "Xóa màu thành công!";
+                TempData["Success"] = "Color deleted successfully!";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi xóa màu: " + ex.Message;
+                TempData["Error"] = "Error deleting color: " + ex.Message;
             }
 
             return RedirectToAction("Index");

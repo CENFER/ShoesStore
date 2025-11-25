@@ -30,7 +30,7 @@ namespace ShoesStore.Areas.Admin.Repositories
             bool exists = context.Vouchers.Any(v => v.Mavoucher == voucher.Mavoucher);
             if (exists)
             {
-                throw new System.Exception($"Mã voucher '{voucher.Mavoucher}' đã tồn tại trong hệ thống. Vui lòng chọn mã khác.");
+                throw new System.Exception($"Voucher code '{voucher.Mavoucher}' already exists in the system. Please choose another code.");
             }
 
             context.Vouchers.Add(voucher);
@@ -43,7 +43,7 @@ namespace ShoesStore.Areas.Admin.Repositories
             var existingVoucher = context.Vouchers.FirstOrDefault(v => v.Mavoucher == voucher.Mavoucher);
             if (existingVoucher == null)
             {
-                throw new Exception("Voucher không tồn tại!");
+                throw new Exception("Voucher does not exist!");
             }
 
             // CẬP NHẬT THÔNG TIN

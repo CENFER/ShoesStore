@@ -1,6 +1,15 @@
 ﻿@using ShoesStore.Models
 @model IEnumerable<Nhanvien>
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
 <!--Just show data of nhan vien, just show password in update because it not frequently data used-->
 <a asp-action="CreateEmployee" class="btn btn-primary">Add Employee</a>
 <div class="container">
@@ -32,12 +41,18 @@
                                 <i class="fas fa-pen"></i>
                             </button>
                         </form>
-                        <form asp-controller="StaffAdmin" asp-action="DeleteEmployee" method="post">
+                        <form asp-controller="StaffAdmin"
+                              asp-action="DeleteEmployee"
+                              method="post"
+                              onsubmit="return confirm('Are you sure you want to delete this employee?');">
+
                             <input type="hidden" name="id" value="@employee.Manv" />
-                            <button type="submit" class="btn btn-danger btn-sm">
+
+                            <button type="submit" class="btn btn-danger btn-sm" title="Delete">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </form>
+
                     </td>
                 </tr>
             }

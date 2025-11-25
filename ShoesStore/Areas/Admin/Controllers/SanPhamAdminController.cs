@@ -82,11 +82,10 @@ namespace ShoesStore.Areas.Admin.Controllers
             //Kiểm tra mã m
             if (string.IsNullOrEmpty(pDetailView.IdMau))
             {
-                TempData["Error"] = "Hiện tại chưa có mã màu trong hệ thống hoặc bạn chưa chọn màu.";
+                TempData["Error"] = "There is currently no color code available or you did not select a color.";
                 return RedirectToAction("SanPhamList", "SanPhamAdmin", new { madongsp = pDetailView.DongsanphamId });
             }
 
-            // Không cần kiểm tra ModelState, vì view đã kiểm tra lỗi nhập liệu
             string uploadFolder = Path.Combine(hostEnvironment.WebRootPath, "img", pDetailView.DongsanphamId.ToString());
             if (!Directory.Exists(uploadFolder))
             {
@@ -94,7 +93,7 @@ namespace ShoesStore.Areas.Admin.Controllers
             }
 
             // 🔹 Xử lý ảnh đại diện
-            string avatarImage = "default.jpg"; // giá trị mặc định nếu không chọn
+            string avatarImage = "default.jpg";
             if (pDetailView.AvatarImage != null)
             {
                 avatarImage = Guid.NewGuid().ToString() + "_" + pDetailView.AvatarImage.FileName;
@@ -141,7 +140,6 @@ namespace ShoesStore.Areas.Admin.Controllers
                 videoPath = ProcessUploadedFile(pDetailView.VideoFile, videosUploadFolder);
             }
 
-            // 🔹 Tạo mới đối tượng sản phẩm
             Sanpham ctSp = new Sanpham
             {
                 Madongsanpham = pDetailView.DongsanphamId,
@@ -153,10 +151,8 @@ namespace ShoesStore.Areas.Admin.Controllers
                 TrangThai = (Sanpham.TrangThaiEnum)pDetailView.TrangThai,
             };
 
-            // 🔹 Lưu DB
             prDetailAdmin.AddChitietSp(ctSp);
 
-            // 🔹 Lưu danh sách size
             List<int> IdSizeList = sizeAdmin.GetMasizeList();
             List<Sanphamsize> tkhos = IdSizeList.Zip(pDetailView.slton,
                 (idSize, SAndAmount) => new Sanphamsize
@@ -168,11 +164,11 @@ namespace ShoesStore.Areas.Admin.Controllers
 
             tkhoAdmin.AddListTonKho(tkhos);
 
-            // ✅ Thông báo thành công
-            TempData["Success"] = "Đã thêm sản phẩm mới thành công!";
+            TempData["Success"] = "Product added successfully!";
 
             return RedirectToAction("SanPhamList", "SanPhamAdmin", new { madongsp = pDetailView.DongsanphamId });
         }
+
         private string ProcessUploadedFile(IFormFile file, string uploadFolder)
         {
             string fileName = Guid.NewGuid().ToString() + "_" + file.FileName;
@@ -279,17 +275,18 @@ namespace ShoesStore.Areas.Admin.Controllers
 
                 tkhoAdmin.UpdateListSpSize(spSize);
 
-                // ✅ Thông báo khi cập nhật thành công
-                TempData["Success"] = "Đã cập nhật sản phẩm thành công!";
+                TempData["Success"] = "Product updated successfully!";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi cập nhật sản phẩm: " + ex.Message;
+                TempData["Error"] = "Error updating product: " + ex.Message;
             }
 
             return RedirectToAction("SanPhamList", "SanPhamAdmin", new { madongsp = pDetailView.DongsanphamId });
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult DeleteSanPham(int masp)
         {
             try
@@ -298,31 +295,28 @@ namespace ShoesStore.Areas.Admin.Controllers
 
                 if (ctSp == null)
                 {
-                    TempData["Error"] = "Không tìm thấy sản phẩm để xóa.";
+                    TempData["Error"] = "Product not found for deletion.";
                     return RedirectToAction("SanPhamList");
                 }
 
                 int madongsp = ctSp.Madongsanpham;
 
-                // ✅ Xóa file ảnh & video
                 DeleteImage(madongsp, ctSp.Anhdaidien);
                 DeleteImage(madongsp, ctSp.Anhmattren);
                 DeleteImage(madongsp, ctSp.Anhdegiay);
                 DeleteVideo(madongsp, ctSp.Video);
 
-                // ✅ Xóa sản phẩm & dữ liệu liên quan
                 prDetailAdmin.DeleteChitietSp(masp);
 
-                TempData["Success"] = "Đã xóa sản phẩm thành công!";
+                TempData["Success"] = "Product deleted successfully!";
                 return RedirectToAction("SanPhamList", new { madongsp = madongsp });
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi xóa sản phẩm: " + ex.Message;
+                TempData["Error"] = "Error deleting product: " + ex.Message;
                 return RedirectToAction("SanPhamList");
             }
         }
-
 
 
         public void DeleteImage(int madongsp, string imagePath)

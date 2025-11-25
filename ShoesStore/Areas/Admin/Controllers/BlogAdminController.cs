@@ -49,25 +49,21 @@ namespace ShoesStore.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult AddBlog(BlogViewModel blogViewModels)
         {
-
             try
             {
-
                 int manv = nvRepo.getMaNVCurrent(HttpContext.Session.GetString("Email"));
-
                 blogViewModels.Manv = manv;
 
-
                 string fileName = "";
-
                 string uploadsFolder = Path.Combine(_hostingEnvironment.WebRootPath, "img", "blog");
+
                 fileName = Guid.NewGuid().ToString() + "_" + blogViewModels.BlogImage.FileName;
                 string filePath = Path.Combine(uploadsFolder, fileName);
+
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
                     blogViewModels.BlogImage.CopyTo(fileStream);
                 }
-
 
                 Blog blog = new Blog
                 {
@@ -80,18 +76,20 @@ namespace ShoesStore.Areas.Admin.Controllers
                 int addedBlogId = _blogRepository.AddBlog(blog);
                 if (addedBlogId > 0)
                 {
+                    TempData["Success"] = "Blog created successfully!";
                     return RedirectToAction(nameof(ListBlogs));
                 }
                 else
                 {
+                    TempData["Error"] = "An error occurred while creating the blog.";
                     ModelState.AddModelError("", "Error occurred while adding the blog.");
                 }
             }
             catch (Exception ex)
             {
+                TempData["Error"] = "An error occurred: " + ex.Message;
                 ModelState.AddModelError("", "An error occurred: " + ex.Message);
             }
-
 
             return View(blogViewModels);
         }
@@ -102,22 +100,20 @@ namespace ShoesStore.Areas.Admin.Controllers
             Blog blog = _blogRepository.GetBlog(Mablog);
             if (blog == null)
             {
+                TempData["Error"] = "Blog not found.";
                 return NotFound();
             }
 
-            // Map the Blog model to BlogViewModel
             var blogViewModel = new BlogViewModel
             {
                 Mablog = blog.Mablog,
                 Manv = blog.Manv,
                 Noidung = blog.Noidung,
                 Theloai = blog.Theloai
-                // You may need to map other properties if necessary
             };
 
             return View(blogViewModel);
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -125,50 +121,66 @@ namespace ShoesStore.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                string uploadsFolder = Path.Combine(_hostingEnvironment.WebRootPath, "img", "blog");
-                string fileName = Guid.NewGuid().ToString() + "_" + blogViewModels.BlogImage.FileName;
-                string filePath = Path.Combine(uploadsFolder, fileName);
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                try
                 {
-                    blogViewModels.BlogImage.CopyTo(fileStream);
+                    string uploadsFolder = Path.Combine(_hostingEnvironment.WebRootPath, "img", "blog");
+                    string fileName = Guid.NewGuid().ToString() + "_" + blogViewModels.BlogImage.FileName;
+                    string filePath = Path.Combine(uploadsFolder, fileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        blogViewModels.BlogImage.CopyTo(fileStream);
+                    }
+
+                    Blog blog = _blogRepository.GetBlog(blogViewModels.Mablog);
+                    blog.Anhdaidien = fileName;
+                    blog.Theloai = blogViewModels.Theloai;
+                    blog.Noidung = blogViewModels.Noidung;
+
+                    bool isUpdated = _blogRepository.UpdateBlog(blog);
+
+                    if (isUpdated)
+                    {
+                        TempData["Success"] = "Blog updated successfully!";
+                        return RedirectToAction(nameof(ListBlogs));
+                    }
+                    else
+                    {
+                        TempData["Error"] = "Error updating blog.";
+                        return View("Error");
+                    }
                 }
-
-
-                Blog blog = _blogRepository.GetBlog(blogViewModels.Mablog);
-                blog.Anhdaidien = fileName;
-                blog.Theloai= blogViewModels.Theloai;
-                blog.Noidung = blogViewModels.Noidung;
-
-                bool isUpdated = _blogRepository.UpdateBlog(blog);
-
-                if (isUpdated)
+                catch (Exception ex)
                 {
-                    return RedirectToAction(nameof(ListBlogs));
-                }
-                else
-                {
-                    return View("Error");
+                    TempData["Error"] = "An error occurred while updating: " + ex.Message;
                 }
             }
 
             return View(blogViewModels);
         }
 
-
         [HttpPost]
         public IActionResult DeleteBlog(int Mablog)
         {
-            bool isDeleted = _blogRepository.DeleteBlog(Mablog);
-            if (isDeleted)
+            try
             {
+                bool isDeleted = _blogRepository.DeleteBlog(Mablog);
+                if (isDeleted)
+                {
+                    TempData["Success"] = "Blog deleted successfully!";
+                    return RedirectToAction(nameof(ListBlogs));
+                }
+                else
+                {
+                    TempData["Error"] = "Error deleting blog.";
+                    return View("Error");
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "An error occurred while deleting: " + ex.Message;
                 return RedirectToAction(nameof(ListBlogs));
             }
-            else
-            {
-                return View("Error");
-            }
         }
-
-
     }
 }

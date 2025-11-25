@@ -65,32 +65,3 @@
         </tbody>
     </table>
 </div>
-@*section scripts{
-    <script>
-        $(document).ready(function () {
-            // Xử lý sự kiện khi nhấn nút cập nhật
-            $('body').on('click', '.btnCapNhat', function () {
-                var id = $(this).data("id");
-                $('#txtUrunId').val(id);
-                $('#modal-default').modal('show');
-            });
-
-            // Xử lý sự kiện khi nhấn nút lưu trong modal
-            $('body').on('click', '.btnLuu', function () {
-                var id = $('#txtUrunId').val();
-                var tt = $('#ddTrangThai').val();
-                $.ajax({
-                    url: '/admin/order/UpdateTT',
-                    type: 'POST',
-                    data: { id: id, trangthai: tt },
-                    success: function (res) {
-                        if (res.Success) {
-                            location.reload();
-                        }
-                    }
-                });
-            });
-        });
-    </script>
-} *@
-

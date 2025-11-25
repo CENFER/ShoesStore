@@ -60,16 +60,16 @@ namespace ShoesStore.Areas.Admin.Repositories
                 catch (DbUpdateException ex)
                 {
                     // Xử lý lỗi khóa ngoại
-                    throw new Exception("Không thể xóa khuyến mãi vì có sản phẩm đang tham chiếu. Vui lòng kiểm tra lại.");
+                    throw new Exception("Cannot delete promotion because there are products referencing it. Please check and try again.");
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("Lỗi khi xóa khuyến mãi: " + ex.Message);
+                    throw new Exception("Error deleting promotion: " + ex.Message);
                 }
             }
             else
             {
-                throw new Exception("Khuyến mãi không tồn tại!");
+                throw new Exception("Promotion does not exist!");
             }
         }
     }

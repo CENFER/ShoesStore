@@ -3,6 +3,8 @@ using ShoesStore.Areas.Admin.InterfaceRepositories;
 using ShoesStore.Areas.Admin.ViewModels;
 using ShoesStore.Models;
 using ShoesStore.Models.Authentication;
+using System;
+using System.IO;
 
 namespace ShoesStore.Areas.Admin.Controllers
 {
@@ -37,36 +39,53 @@ namespace ShoesStore.Areas.Admin.Controllers
             if (ModelState.IsValid)
             {
                 string fileName = "";
-                if (bannerViewModel.FrontImage != null)
+                try
                 {
-                    string uploadsFolder = Path.Combine(hostingenvironment.WebRootPath, "img", "banner");
-                    fileName = Guid.NewGuid().ToString() + "_" + bannerViewModel.FrontImage.FileName;
-                    string filePath = Path.Combine(uploadsFolder, fileName);
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    if (bannerViewModel.FrontImage != null)
                     {
-                        bannerViewModel.FrontImage.CopyTo(fileStream);
+                        string uploadsFolder = Path.Combine(hostingenvironment.WebRootPath, "img", "banner");
+                        if (!Directory.Exists(uploadsFolder))
+                        {
+                            Directory.CreateDirectory(uploadsFolder);
+                        }
+                        fileName = Guid.NewGuid().ToString() + "_" + bannerViewModel.FrontImage.FileName;
+                        string filePath = Path.Combine(uploadsFolder, fileName);
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            bannerViewModel.FrontImage.CopyTo(fileStream);
+                        }
                     }
+
+                    Banner banner = new Banner
+                    {
+                        Tenbanner = bannerViewModel.Tenbanner,
+                        Vitri = fileName,
+                        Link = bannerViewModel.Link,
+                        Hoatdong = bannerViewModel.Hoatdong,
+                        Slogan = bannerViewModel.Slogan
+                    };
+
+                    try
+                    {
+                        _bannerRepository.AddBanner(banner);
+                        TempData["Success"] = "Banner created successfully!";
+                    }
+                    catch (Exception exRepo)
+                    {
+                        TempData["Error"] = "Error creating banner: " + exRepo.Message;
+                        return View(bannerViewModel);
+                    }
+
+                    return RedirectToAction("IndexBanner");
                 }
-
-                Banner banner = new Banner
+                catch (Exception ex)
                 {
-                    Tenbanner = bannerViewModel.Tenbanner,
-                    Vitri = fileName,
-                    Link = bannerViewModel.Link,
-                    Hoatdong = bannerViewModel.Hoatdong,
-                    Slogan = bannerViewModel.Slogan
-
-                };
-
-                _bannerRepository.AddBanner(banner);
-                return RedirectToAction("IndexBanner");
+                    TempData["Error"] = "Error processing file or creating banner: " + ex.Message;
+                    return View(bannerViewModel);
+                }
             }
             return View(bannerViewModel);
         }
-
-
-
-
 
         [HttpGet]
         public IActionResult EditBanner(int id)
@@ -85,7 +104,6 @@ namespace ShoesStore.Areas.Admin.Controllers
                 Link = banner.Link,
                 Hoatdong = banner.Hoatdong,
                 Slogan = banner.Slogan
-
             };
 
             return View(bannerViewModel);
@@ -97,30 +115,51 @@ namespace ShoesStore.Areas.Admin.Controllers
             if (ModelState.IsValid)
             {
                 string fileName = "";
-                if (bannerViewModel.FrontImage != null)
+                try
                 {
-                    string uploadsFolder = Path.Combine(hostingenvironment.WebRootPath, "img", "banner");
-                    fileName = Guid.NewGuid().ToString() + "_" + bannerViewModel.FrontImage.FileName;
-                    string filePath = Path.Combine(uploadsFolder, fileName);
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    if (bannerViewModel.FrontImage != null)
                     {
-                        bannerViewModel.FrontImage.CopyTo(fileStream);
+                        string uploadsFolder = Path.Combine(hostingenvironment.WebRootPath, "img", "banner");
+                        if (!Directory.Exists(uploadsFolder))
+                        {
+                            Directory.CreateDirectory(uploadsFolder);
+                        }
+                        fileName = Guid.NewGuid().ToString() + "_" + bannerViewModel.FrontImage.FileName;
+                        string filePath = Path.Combine(uploadsFolder, fileName);
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            bannerViewModel.FrontImage.CopyTo(fileStream);
+                        }
                     }
+
+                    Banner banner = new Banner
+                    {
+                        Mabanner = bannerViewModel.Mabanner,
+                        Tenbanner = bannerViewModel.Tenbanner,
+                        Vitri = fileName,
+                        Link = bannerViewModel.Link,
+                        Hoatdong = bannerViewModel.Hoatdong,
+                        Slogan = bannerViewModel.Slogan
+                    };
+
+                    try
+                    {
+                        _bannerRepository.UpdateBanner(banner);
+                        TempData["Success"] = "Banner updated successfully!";
+                    }
+                    catch (Exception exRepo)
+                    {
+                        TempData["Error"] = "Error updating banner: " + exRepo.Message;
+                        return View(bannerViewModel);
+                    }
+
+                    return RedirectToAction("IndexBanner");
                 }
-
-                Banner banner = new Banner
+                catch (Exception ex)
                 {
-                    Mabanner = bannerViewModel.Mabanner,
-                    Tenbanner = bannerViewModel.Tenbanner,
-                    Vitri = fileName,
-                    Link = bannerViewModel.Link,
-                    Hoatdong = bannerViewModel.Hoatdong,
-                    Slogan = bannerViewModel.Slogan
-
-                };
-
-                _bannerRepository.UpdateBanner(banner);
-                return RedirectToAction("IndexBanner");
+                    TempData["Error"] = "Error processing file or updating banner: " + ex.Message;
+                    return View(bannerViewModel);
+                }
             }
             return View(bannerViewModel);
         }
@@ -128,9 +167,16 @@ namespace ShoesStore.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult DeleteBanner(int id)
         {
-            _bannerRepository.RemoveBanner(id);
+            try
+            {
+                _bannerRepository.RemoveBanner(id);
+                TempData["Success"] = "Banner deleted successfully!";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error deleting banner: " + ex.Message;
+            }
             return RedirectToAction("IndexBanner");
         }
-
     }
 }

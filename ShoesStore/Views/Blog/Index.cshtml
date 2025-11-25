@@ -21,66 +21,17 @@
 </section>
 <!-- End Banner Area -->
 <!--================Blog Categorie Area =================-->
-<section class="blog_categorie_area">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-4">
-                <div class="categories_post">
-                    <img src="~/karma-master/img/blog/cat-post/cat-post-3.jpg" alt="post">
-                    <div class="categories_details">
-                        <div class="categories_text">
-                            <a href="blog-details.html">
-                                <h5>Social Life</h5>
-                            </a>
-                            <div class="border_line"></div>
-                            <p>Enjoy your social life together</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4">
-                <div class="categories_post">
-                    <img src="~/karma-master/img/blog/cat-post/cat-post-2.jpg" alt="post">
-                    <div class="categories_details">
-                        <div class="categories_text">
-                            <a href="blog-details.html">
-                                <h5>Politics</h5>
-                            </a>
-                            <div class="border_line"></div>
-                            <p>Be a part of politics</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4">
-                <div class="categories_post">
-                    <img src="~/karma-master/img/blog/cat-post/cat-post-1.jpg" alt="post">
-                    <div class="categories_details">
-                        <div class="categories_text">
-                            <a href="blog-details.html">
-                                <h5>Food</h5>
-                            </a>
-                            <div class="border_line"></div>
-                            <p>Let the food be finished</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-<div class="container blog-section">
-    <h2 class="text-center mb-4">Blog List</h2>
 
-    <div class="row">
+<div class="container blog-section" style="border-radius:3px">
+    <h2 class="text-center mb-4" style="margin-top:35px">Blog List</h2>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         @foreach (var blog in Model)
         {
-            <div class="col-lg-4 col-md-6 col-sm-12 mb-4 d-flex align-items-stretch">
-                <div class="card shadow-sm w-100">
+            <div class="col">
+                <div class="card h-100">
                     <img src="@Url.Content($"~/img/blog/{blog.Anhdaidien}")"
                          class="card-img-top"
-                         alt="Blog Image"
-                         style="height: 225px; object-fit: cover;">
+                         style="height:225px; object-fit:cover;">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title">@blog.Theloai</h5>
                         <p class="card-text flex-grow-1">
@@ -94,37 +45,45 @@
         }
     </div>
 </div>
-
 <style>
-    /* Override CSS của theme gây co cột */
+    /* Reset row cho đúng grid */
     .blog-section .row {
         display: flex !important;
         flex-wrap: wrap !important;
-        justify-content: flex-start !important;
-        margin-left: -15px;
-        margin-right: -15px;
+        margin-left: -12px !important;
+        margin-right: -12px !important;
     }
 
-    .blog-section .col-lg-4 {
-        flex: 0 0 33.3333% !important;
-        max-width: 33.3333% !important;
-        padding-left: 15px;
-        padding-right: 15px;
+    /* Ép cứng mỗi item = 1/3 width */
+    .blog-section .col {
+        flex: 0 0 33.333333% !important;
+        max-width: 33.333333% !important;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        margin-bottom: 35px !important;
+        box-sizing: border-box !important;
+        float: none !important;
     }
 
-    /* Giữ card đều và ảnh không méo */
+    /* card chuẩn */
     .blog-section .card {
-        width: 100%;
-        height: 100%;
+        display: flex;
+        flex-direction: column;
+        height: 100% !important;
+        /* border: 2px solid #ccc !important;
+        border-radius: 10px !important; */
     }
 
-    .blog-section img.card-img-top {
-        width: 100%;
-        height: 225px;
-        object-fit: cover;
+    /* ảnh không bị méo */
+    .blog-section .card-img-top {
+        width: 100% !important;
+        height: 225px !important;
+        object-fit: cover !important;
+        display: block !important;
     }
 
+</style>
 
-    }</style>
+
 
 

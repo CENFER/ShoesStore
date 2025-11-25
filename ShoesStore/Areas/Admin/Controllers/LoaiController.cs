@@ -34,7 +34,7 @@ namespace ShoesStore.Areas.Admin.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    TempData["Error"] = "Vui lòng nhập đầy đủ thông tin.";
+                    TempData["Error"] = "Please fill in all required information.";
                     return View(loai);
                 }
 
@@ -45,17 +45,17 @@ namespace ShoesStore.Areas.Admin.Controllers
 
                 if (existed)
                 {
-                    TempData["Error"] = "Đã tồn tại loại giày này trong hệ thống.";
+                    TempData["Error"] = "This category already exists in the system.";
                     return View(loai);
                 }
 
                 _lrepo.AddLoai(loai);
-                TempData["Success"] = "Thêm loại giày mới thành công!";
+                TempData["Success"] = "Category added successfully!";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi thêm: " + ex.Message;
+                TempData["Error"] = "Error while adding: " + ex.Message;
                 return RedirectToAction("Index");
             }
         }
@@ -65,7 +65,7 @@ namespace ShoesStore.Areas.Admin.Controllers
             Loai loai = _lrepo.GetLoaiById(Id);
             if (loai == null)
             {
-                TempData["Error"] = "Không tìm thấy loại giày.";
+                TempData["Error"] = "Category not found.";
                 return RedirectToAction("Index");
             }
             return View(loai);
@@ -78,7 +78,7 @@ namespace ShoesStore.Areas.Admin.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    TempData["Error"] = "Vui lòng nhập thông tin hợp lệ.";
+                    TempData["Error"] = "Please enter valid information.";
                     return View(loai);
                 }
 
@@ -89,31 +89,32 @@ namespace ShoesStore.Areas.Admin.Controllers
 
                 if (existed)
                 {
-                    TempData["Error"] = "Tên loại giày này đã tồn tại.";
+                    TempData["Error"] = "This category name already exists.";
                     return View(loai);
                 }
 
                 _lrepo.UpdateLoai(loai, Id);
-                TempData["Success"] = "Cập nhật thành công!";
+                TempData["Success"] = "Category updated successfully!";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi sửa: " + ex.Message;
+                TempData["Error"] = "Error while updating: " + ex.Message;
                 return RedirectToAction("Index");
             }
         }
-        [HttpGet]
+
+        [HttpPost]
         public IActionResult Delete(int id)
         {
             try
             {
                 _lrepo.DeleteLoai(id);
-                TempData["Success"] = "Đã xóa loại giày thành công!";
+                TempData["Success"] = "Category deleted successfully!";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi xóa: " + ex.Message;
+                TempData["Error"] = "Error while deleting: " + ex.Message;
             }
 
             return RedirectToAction("Index");

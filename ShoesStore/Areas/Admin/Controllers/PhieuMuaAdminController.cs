@@ -64,14 +64,15 @@ namespace ShoesStore.Areas.Admin.Controllers
             try
             {
                 _pmrepo.UpdatePhieuMua(phieuMua, id, oldState);
-                TempData["Success"] = "Cập nhật phiếu mua thành công.";
+                TempData["Success"] = "Purchase order updated successfully.";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi cập nhật phiếu mua: " + ex.Message;
+                TempData["Error"] = "Error updating purchase order: " + ex.Message;
             }
 
             return RedirectToAction(nameof(Index));
         }
+
     }
 }

@@ -47,17 +47,17 @@ namespace ShoesStore.Areas.Admin.Controllers
                 {
                     dongsanpham.MaloaiNavigation = null;
                     _dongsanphamRepo.AddDongsanpham(dongsanpham);
-                    TempData["Success"] = "Đã thêm dòng sản phẩm mới thành công!";
+                    TempData["Success"] = "Product line added successfully!";
                     return RedirectToAction(nameof(Index));
                 }
 
-                TempData["Error"] = "Vui lòng kiểm tra lại dữ liệu nhập vào.";
+                TempData["Error"] = "Please check the entered data.";
                 ViewBag.Selectloai = GetSelectListItems();
                 return View(dongsanpham);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi thêm dòng sản phẩm: " + ex.Message;
+                TempData["Error"] = "Error adding product line: " + ex.Message;
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -67,7 +67,7 @@ namespace ShoesStore.Areas.Admin.Controllers
             var dongsanpham = _dongsanphamRepo.GetDongsanphamById(id);
             if (dongsanpham == null)
             {
-                TempData["Error"] = "Không tìm thấy dòng sản phẩm cần sửa.";
+                TempData["Error"] = "Product line not found.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -84,30 +84,32 @@ namespace ShoesStore.Areas.Admin.Controllers
                 if (ModelState.IsValid)
                 {
                     _dongsanphamRepo.UpdateDongsanpham(dongsanpham, id);
-                    TempData["Success"] = "Đã cập nhật dòng sản phẩm thành công!";
+                    TempData["Success"] = "Product line updated successfully!";
                     return RedirectToAction(nameof(Index));
                 }
 
-                TempData["Error"] = "Dữ liệu không hợp lệ, vui lòng kiểm tra lại.";
+                TempData["Error"] = "Invalid data. Please check again.";
                 return View(dongsanpham);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi cập nhật: " + ex.Message;
+                TempData["Error"] = "Error updating product line: " + ex.Message;
                 return RedirectToAction(nameof(Index));
             }
         }
-        [HttpGet]
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
             try
             {
                 _dongsanphamRepo.DeleteDongsanpham(id);
-                TempData["Success"] = "Đã xóa dòng sản phẩm thành công!";
+                TempData["Success"] = "Product line deleted successfully!";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi xóa dòng sản phẩm: " + ex.Message;
+                TempData["Error"] = "Error deleting product line: " + ex.Message;
             }
 
             return RedirectToAction(nameof(Index));
