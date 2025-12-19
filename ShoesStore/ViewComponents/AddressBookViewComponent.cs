@@ -31,7 +31,7 @@ namespace ShoesStore.ViewComponents
 
             SodiachiProfileViewModel sdcprofile = new SodiachiProfileViewModel()
             {
-                sdc = addressRepo.GetAllAddressNote(),
+                sdc = addressRepo.GetAddressNoteByCustomer(kh.Makh),
                 currentKhName = kh.Tenkh,
                 currentPhone = kh.Sdt
             };

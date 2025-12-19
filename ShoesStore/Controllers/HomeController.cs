@@ -29,11 +29,6 @@ namespace ShoesStore.Controllers
 			return View(banners);
 		}
 
-	
-		public IActionResult Zalo()
-		{
-			return View();
-		}
 
 	}
 }

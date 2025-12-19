@@ -24,10 +24,11 @@ namespace ShoesStore.Repositories
             return context.Phuongs.Where(x => x.Maquan == districts).ToList();
         }
 
-        public List<Sodiachi> GetAllAddressNote()
+        public List<Sodiachi> GetAddressNoteByCustomer(int makh)
         {
-            return context.Sodiachis.ToList();
+            return context.Sodiachis.Where(x => x.Makh == makh).ToList();
         }
+
         public int GetMaTinh(string TenTinh)
         {
             return context.Tinhs.FirstOrDefault(x=>x.Tentinh == TenTinh).Matinh;

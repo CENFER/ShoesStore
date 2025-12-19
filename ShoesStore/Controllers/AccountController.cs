@@ -94,7 +94,8 @@ namespace ShoesStore.Controllers
             string email = HttpContext.Session.GetString("Email") ?? "lephat@gmail.com";
             Khachhang kh = khRepo.GetCurrentKh(email);
             addressRepo.AddAddressNote(province, district, ward, address, kh.Makh, tennguoinhan, sdtnguoinhan);
-            List<Sodiachi> sdc = addressRepo.GetAllAddressNote();
+            List<Sodiachi> sdc = addressRepo.GetAddressNoteByCustomer(kh.Makh);
+
             return PartialView("AddressBookPartialView",sdc);
         }
         // POST: /Account/Login

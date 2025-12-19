@@ -75,7 +75,7 @@ namespace ShoesStore.Controllers
                 Email = kh?.Email ?? "",
                 Mapttt = 0,
                 voucherList = voucherRepo.getAllVoucherToday(),
-                sodiachis = addressRepo.GetAllAddressNote(),
+                sodiachis = addressRepo.GetAddressNoteByCustomer(kh.Makh),
                 totalCost = total,
                 tempCost = total,
                 Choosenvoucher = null,
@@ -166,7 +166,7 @@ namespace ShoesStore.Controllers
                 Mapttt = 0,
                 voucherList = voucherList,
                 Choosenvoucher = string.IsNullOrEmpty(mavoucher) ? null : voucher,
-                sodiachis = addressRepo.GetAllAddressNote(),
+                sodiachis = addressRepo.GetAddressNoteByCustomer(kh.Makh),
                 totalCost = total,
                 tempCost = tempCost,
                 coinGet = coin,
@@ -196,7 +196,7 @@ namespace ShoesStore.Controllers
 
             if (Check(phieuMua) == true)
             {
-                phieuMua.sodiachis = addressRepo.GetAllAddressNote();
+                phieuMua.sodiachis = addressRepo.GetAddressNoteByCustomer(kh.Makh);
                 phieuMua.voucherList = voucherRepo.getAllVoucherToday();
                 ViewBag.xuTemp = phieuMua.coinChoosen;
                 ViewBag.AmountApply = phieuMua.coinApply;
@@ -261,7 +261,7 @@ namespace ShoesStore.Controllers
             Khachhang kh = khRepo.GetCurrentKh("lephat@gmail.com");
             pm.khInfo = kh;
 
-            pm.sodiachis = addressRepo.GetAllAddressNote();
+            pm.sodiachis = addressRepo.GetAddressNoteByCustomer(kh.Makh);
 
             return View(pm);
         }
@@ -361,8 +361,10 @@ namespace ShoesStore.Controllers
 
         public IActionResult UpdateAddressFinal(int masdc,string hoten,string sdt,string diachi,int matinh,int maquan,int maphuong)
         {
+            string email = HttpContext.Session.GetString("Email");
+            Khachhang kh = khRepo.GetCurrentKh(email);
             addressRepo.UpdateSDC(masdc, hoten, sdt, diachi, matinh, maquan, maphuong);
-            List<Sodiachi> sdcList = addressRepo.GetAllAddressNote();
+            List<Sodiachi> sdcList = addressRepo.GetAddressNoteByCustomer(kh.Makh);
 
             return PartialView("AddressBookPartialView",sdcList);
 
@@ -370,8 +372,10 @@ namespace ShoesStore.Controllers
         
         public IActionResult DeleteAddress(int masdc)
         {
+            string email = HttpContext.Session.GetString("Email");
+            Khachhang kh = khRepo.GetCurrentKh(email);
             addressRepo.DeleteSDC(masdc);
-            List<Sodiachi> sdcList = addressRepo.GetAllAddressNote();
+            List<Sodiachi> sdcList = addressRepo.GetAddressNoteByCustomer(kh.Makh);
 
             return PartialView("AddressBookPartialView", sdcList);
         }
