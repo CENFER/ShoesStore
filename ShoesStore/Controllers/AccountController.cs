@@ -91,7 +91,7 @@ namespace ShoesStore.Controllers
         }
         public IActionResult AddAddress(int province, int district, int ward, string address, string tennguoinhan, string sdtnguoinhan)
         {
-            string email = HttpContext.Session.GetString("Email") ?? "lephat@gmail.com";
+            string email = HttpContext.Session.GetString("Email");
             Khachhang kh = khRepo.GetCurrentKh(email);
             addressRepo.AddAddressNote(province, district, ward, address, kh.Makh, tennguoinhan, sdtnguoinhan);
             List<Sodiachi> sdc = addressRepo.GetAddressNoteByCustomer(kh.Makh);

@@ -26,18 +26,6 @@
     <h2 class="display-4">SHOES CATEGORY LIST</h2>
 </div>
 
-@section searchArea{
-    <form id="searchForm" asp-controller="Loai" asp-action="Index" method="get" class="d-flex" style="width:468px">
-        <div class="input-group">
-            <!-- Search bar -->
-            <input name="searchString" id="searchString" type="search" placeholder="search type shoes..." class="form-control rounded" aria-label="Search" style="width:100px">
-            <button class="btn btn-info rounded" type="submit" style="width: 40px; height: 40px;">
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
-    </form>
-
-}
 <div style="display: flex; justify-content: space-between; align-items: center; width:100%">
     <!-- Link for creating a new Loai -->
     <a asp-action="Create" asp-controller="Loai" class="btn btn-primary"><i class="mdi mdi-plus-circle"></i></a>

@@ -12,16 +12,6 @@
     <h2 class="display-4">VOUCHER LIST</h2>
 </div>
 
-@section searchArea {
-    <form id="searchForm" asp-controller="Voucher" asp-action="Index" method="get" class="d-flex" style="width:468px">
-        <div class="input-group">
-            <input name="searchString" id="searchString" type="search" placeholder="searching vouchers..." class="form-control rounded" aria-label="Search">
-            <button class="btn btn-info rounded" type="submit">
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
-    </form>
-}
 
 <div style="display: flex; justify-content: space-between; align-items: center; width:100%">
     <a asp-action="Create" asp-controller="VoucherAdmin" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Add New</a>
