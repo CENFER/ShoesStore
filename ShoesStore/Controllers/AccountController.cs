@@ -186,7 +186,7 @@ namespace ShoesStore.Controllers
         // GET: /Account/ChangeProfile
         public IActionResult ChangeProfile()
         {
-            string userEmail = /*HttpContext.Session.GetString("Email") ??*/ "lephat@gmail.com";
+            string userEmail = HttpContext.Session.GetString("Email");
             var user = _db.Taikhoans
                             .Include(t => t.Khachhang)
                             .FirstOrDefault(x => x.Email == userEmail);
